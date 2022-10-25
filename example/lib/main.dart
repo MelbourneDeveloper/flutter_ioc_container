@@ -103,29 +103,23 @@ class MyApp extends StatelessWidget {
                 key: scopedContainerKey,
                 child: FutureBuilder(
                   future: context.getAsync<SlowService>(),
-                  builder: (c, s) {
-                    //We only do this to create an instance of the disposable
-                    //service for the scope
-                    context<DisposableService>();
-
-                    return AnimatedBuilder(
-                      animation: context<ThemeChangeNotifier>(),
-                      builder: (context, widget) => MaterialApp(
-                        title:
-                            s.data?.title ?? context<DisposableService>().title,
-                        theme: context<ThemeChangeNotifier>().themeData,
-                        home: Scaffold(
-                          appBar: AppBar(
-                            title: s.data != null
-                                ? Text(s.data!.title)
-                                : const CircularProgressIndicator.adaptive(),
-                          ),
-                          body: const CounterDisplay(),
-                          floatingActionButton: floatingActionButtons(context),
+                  builder: (c, s) => AnimatedBuilder(
+                    animation: context<ThemeChangeNotifier>(),
+                    builder: (context, widget) => MaterialApp(
+                      title:
+                          s.data?.title ?? context<DisposableService>().title,
+                      theme: context<ThemeChangeNotifier>().themeData,
+                      home: Scaffold(
+                        appBar: AppBar(
+                          title: s.data != null
+                              ? Text(s.data!.title)
+                              : const CircularProgressIndicator.adaptive(),
                         ),
+                        body: const CounterDisplay(),
+                        floatingActionButton: floatingActionButtons(context),
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
               )
             : const ClosedWidget(),
