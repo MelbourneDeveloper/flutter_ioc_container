@@ -129,27 +129,36 @@ class ScopedContainerWidget extends StatefulWidget {
 ///The staate of the ScopedContainerWidget
 class ScopedContainerWidgetState extends State<ScopedContainerWidget> {
   ///The scoped container for this widget
-  late final IocContainer scope;
+  IocContainer? scope;
+
+  @override
+  void didUpdateWidget(ScopedContainerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    scope ??=
+        context.scoped(useExistingSingletons: widget.useExistingSingletons);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    scope = ContainerWidget.scoped(
-      context,
-      useExistingSingletons: widget.useExistingSingletons,
+    scope ??=
+        context.scoped(useExistingSingletons: widget.useExistingSingletons);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(scope != null, 'No ContainerWidget found in context');
+
+    return ContainerWidget(
+      container: scope!,
+      child: widget.child,
     );
   }
 
   @override
-  Widget build(BuildContext context) => ContainerWidget(
-        container: scope,
-        child: widget.child,
-      );
-
-  @override
   Future<void> dispose() async {
     super.dispose();
-    await scope.dispose();
+    await scope?.dispose();
   }
 
   @override

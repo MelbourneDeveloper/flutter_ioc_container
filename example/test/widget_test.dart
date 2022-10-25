@@ -46,7 +46,7 @@ void main() {
         .state<ScopedContainerWidgetState>(find.byType(ScopedContainerWidget));
 
     final disposable =
-        scopeState.scope.get<DisposableService>() as FakeDisposableService;
+        scopeState.scope!.get<DisposableService>() as FakeDisposableService;
 
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
