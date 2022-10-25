@@ -15,27 +15,8 @@ final darkTheme = ThemeData(
 );
 
 class AppChangeNotifier extends ChangeNotifier {
-  AppChangeNotifier(this.themeNotifier);
-
   int counter = 0;
 
-  bool _displayCounter = true;
-  bool get displayCounter => _displayCounter;
-  set displayCounter(bool value) {
-    _displayCounter = value;
-    notifyListeners();
-  }
-
-  final ThemeChangeNotifier themeNotifier;
-
-  void increment() {
-    counter++;
-    themeNotifier.isDark = counter.isOdd;
-    notifyListeners();
-  }
-}
-
-class ThemeChangeNotifier extends ChangeNotifier {
   bool _isDark = false;
   bool get isDark => _isDark;
   set isDark(bool value) {
@@ -44,6 +25,17 @@ class ThemeChangeNotifier extends ChangeNotifier {
   }
 
   ThemeData get themeData => isDark ? darkTheme : lightTheme;
+  bool _displayCounter = true;
+  bool get displayCounter => _displayCounter;
+  set displayCounter(bool value) {
+    _displayCounter = value;
+    notifyListeners();
+  }
+
+  void increment() {
+    counter++;
+    isDark = counter.isOdd;
+  }
 }
 
 class DisposableService {
@@ -71,7 +63,6 @@ IocContainerBuilder compose({bool allowOverrides = false}) =>
       allowOverrides: allowOverrides,
     )
       //Singetons
-      ..addSingletonService(ThemeChangeNotifier())
       ..addSingletonAsync(
         (container) async => Future<SlowService>.delayed(
           const Duration(seconds: 5),
@@ -79,10 +70,9 @@ IocContainerBuilder compose({bool allowOverrides = false}) =>
         ),
       )
       ..addSingleton(
-        (container) => AppChangeNotifier(
-          container<ThemeChangeNotifier>(),
-        ),
+        (container) => AppChangeNotifier(),
       )
+
       //Transient
       ..add(
         (container) => DisposableService(),
@@ -104,11 +94,11 @@ class MyApp extends StatelessWidget {
                 child: FutureBuilder(
                   future: context.getAsync<SlowService>(),
                   builder: (c, s) => AnimatedBuilder(
-                    animation: context<ThemeChangeNotifier>(),
+                    animation: context<AppChangeNotifier>(),
                     builder: (context, widget) => MaterialApp(
                       title:
                           s.data?.title ?? context<DisposableService>().title,
-                      theme: context<ThemeChangeNotifier>().themeData,
+                      theme: context<AppChangeNotifier>().themeData,
                       home: Scaffold(
                         appBar: AppBar(
                           title: s.data != null
