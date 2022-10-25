@@ -23,7 +23,7 @@ void main() {
 
     final compositionWidget = ContainerWidget(
       container: builder.toContainer(),
-      child: const MyApp(),
+      child: const AppRoot(),
     );
 
     // Build our app and trigger a frame.

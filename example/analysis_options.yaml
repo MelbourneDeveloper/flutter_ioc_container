@@ -4,3 +4,4 @@ analyzer:
   errors:
     use_super_parameters: error
     public_member_api_docs: ignore
+    diagnostic_describe_all_properties: ignore

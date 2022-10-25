@@ -51,7 +51,7 @@ void main() {
   runApp(
     ContainerWidget(
       container: compose().toContainer(),
-      child: const MyApp(),
+      child: const AppRoot(),
     ),
   );
 }
@@ -77,8 +77,8 @@ IocContainerBuilder compose({bool allowOverrides = false}) =>
         dispose: (d) => d.dispose(),
       );
 
-class MyApp extends StatelessWidget {
-  const MyApp({
+class AppRoot extends StatelessWidget {
+  const AppRoot({
     super.key,
   });
 
@@ -87,23 +87,43 @@ class MyApp extends StatelessWidget {
         animation: context<AppChangeNotifier>(),
         builder: (context, widget) => FutureBuilder(
           future: context.getAsync<SlowService>(),
-          builder: (futureBuilderContext, snapshot) => MaterialApp(
-            title: snapshot.data?.title ?? '',
-            theme: futureBuilderContext<AppChangeNotifier>().themeData,
-            home: Scaffold(
-              appBar: AppBar(
-                title: snapshot.data != null
-                    ? Text(snapshot.data!.title)
-                    : const CircularProgressIndicator.adaptive(),
-              ),
-              body: context<AppChangeNotifier>().displayCounter
-                  ? const ScopedContainerWidget(
-                      child: CounterDisplay(),
-                    )
-                  : const ClosedWidget(),
-              floatingActionButton: floatingActionButtons(futureBuilderContext),
-            ),
+          builder: (materialAppContext, snapshot) =>
+              CounterApp(title: snapshot.data?.title),
+        ),
+      );
+}
+
+class CounterApp extends StatelessWidget {
+  const CounterApp({
+    required this.title,
+    super.key,
+  });
+
+  final String? title;
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        title: title ?? '',
+        theme: context<AppChangeNotifier>().themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: title != null
+                ? Text(title!)
+                : const CircularProgressIndicator.adaptive(),
           ),
+          body: context<AppChangeNotifier>().displayCounter
+              ? const ScopedContainerWidget(
+                  child: CounterDisplay(),
+                )
+              : const Align(
+                  child: Text(
+                    'X',
+                    style: TextStyle(
+                      fontSize: 50,
+                    ),
+                  ),
+                ),
+          floatingActionButton: floatingActionButtons(context),
         ),
       );
 
@@ -125,27 +145,6 @@ class MyApp extends StatelessWidget {
             child: const Icon(Icons.add),
           ),
         ],
-      );
-}
-
-///This is a blank widget that displays when the app is closed
-class ClosedWidget extends StatelessWidget {
-  const ClosedWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) => const MaterialApp(
-        home: Scaffold(
-          body: Align(
-            child: Text(
-              'X',
-              style: TextStyle(
-                fontSize: 50,
-              ),
-            ),
-          ),
-        ),
       );
 }
 
