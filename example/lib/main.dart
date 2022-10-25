@@ -2,42 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 import 'package:ioc_container/ioc_container.dart';
 
-final lightTheme = ThemeData(
-  primarySwatch: Colors.blue,
-  brightness: Brightness.light,
-);
-
-final darkTheme = ThemeData(
-  primarySwatch: Colors.blue,
-  brightness: Brightness.dark,
-);
-
 class AppChangeNotifier extends ChangeNotifier {
-  int counter = 0;
-
-  bool _isDark = false;
   bool get isDark => _isDark;
   set isDark(bool value) {
     _isDark = value;
     notifyListeners();
   }
 
-  ThemeData get themeData => isDark ? darkTheme : lightTheme;
-  bool _displayCounter = true;
   bool get displayCounter => _displayCounter;
   set displayCounter(bool value) {
     _displayCounter = value;
     notifyListeners();
   }
 
+  ThemeData get themeData => isDark
+      ? ThemeData(
+          primarySwatch: Colors.blue,
+          brightness: Brightness.dark,
+        )
+      : ThemeData(
+          primarySwatch: Colors.blue,
+          brightness: Brightness.light,
+        );
+
+  int get counter => _counter;
+
+  int _counter = 0;
+  bool _isDark = false;
+  bool _displayCounter = true;
+
   void increment() {
-    counter++;
+    _counter++;
+    //No need to notify listeners because that will get called here
     isDark = counter.isOdd;
   }
 }
 
 class DisposableService {
-  final title = 'You have pushed the button this many times:';
+  final counterLabel = 'You have pushed the button this many times:';
   void dispose() {
     debugPrint('Disposed of the disposable service');
   }
@@ -159,7 +161,7 @@ class CounterDisplay extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              context<DisposableService>().title,
+              context<DisposableService>().counterLabel,
             ),
             Text(
               '${context<AppChangeNotifier>().counter}',

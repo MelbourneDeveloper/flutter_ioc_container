@@ -10,7 +10,7 @@ class FakeDisposableService implements DisposableService {
   void dispose() => isDisposed = true;
 
   @override
-  String get title => 'asdasd';
+  String get counterLabel => 'asdasd';
 }
 
 void main() {
