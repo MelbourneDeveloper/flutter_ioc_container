@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 import 'package:ioc_container/ioc_container.dart';
 
-const scopedContainerKey = ValueKey('asdasd');
-
 final lightTheme = ThemeData(
   primarySwatch: Colors.blue,
   brightness: Brightness.light,
@@ -90,7 +88,6 @@ class MyApp extends StatelessWidget {
         builder: (context, widget) => context<AppChangeNotifier>()
                 .displayCounter
             ? ScopedContainerWidget(
-                key: scopedContainerKey,
                 child: FutureBuilder(
                   future: context.getAsync<SlowService>(),
                   builder: (futureBuilderContext, snapshot) => MaterialApp(
