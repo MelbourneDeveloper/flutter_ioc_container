@@ -49,7 +49,6 @@ void main() {
         scopeState.scope.get<DisposableService>() as FakeDisposableService;
 
     await tester.tap(find.byIcon(Icons.close));
-    await tester.pump(const Duration(seconds: 10));
     await tester.pumpAndSettle();
 
     expect(disposable.isDisposed, true);
