@@ -37,7 +37,7 @@ class AppChangeNotifier extends ChangeNotifier {
 }
 
 class DisposableService {
-  final title = 'asdf';
+  final title = 'You have pushed the button this many times:';
   void dispose() {
     debugPrint('Disposed of the disposable service');
   }
@@ -85,29 +85,26 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: context<AppChangeNotifier>(),
-        builder: (context, widget) => context<AppChangeNotifier>()
-                .displayCounter
-            ? ScopedContainerWidget(
-                child: FutureBuilder(
-                  future: context.getAsync<SlowService>(),
-                  builder: (futureBuilderContext, snapshot) => MaterialApp(
-                    title: snapshot.data?.title ??
-                        futureBuilderContext<DisposableService>().title,
-                    theme: futureBuilderContext<AppChangeNotifier>().themeData,
-                    home: Scaffold(
-                      appBar: AppBar(
-                        title: snapshot.data != null
-                            ? Text(snapshot.data!.title)
-                            : const CircularProgressIndicator.adaptive(),
-                      ),
-                      body: const CounterDisplay(),
-                      floatingActionButton:
-                          floatingActionButtons(futureBuilderContext),
-                    ),
-                  ),
-                ),
-              )
-            : const ClosedWidget(),
+        builder: (context, widget) => FutureBuilder(
+          future: context.getAsync<SlowService>(),
+          builder: (futureBuilderContext, snapshot) => MaterialApp(
+            title: snapshot.data?.title ?? '',
+            theme: futureBuilderContext<AppChangeNotifier>().themeData,
+            home: Scaffold(
+              appBar: AppBar(
+                title: snapshot.data != null
+                    ? Text(snapshot.data!.title)
+                    : const CircularProgressIndicator.adaptive(),
+              ),
+              body: context<AppChangeNotifier>().displayCounter
+                  ? const ScopedContainerWidget(
+                      child: CounterDisplay(),
+                    )
+                  : const ClosedWidget(),
+              floatingActionButton: floatingActionButtons(futureBuilderContext),
+            ),
+          ),
+        ),
       );
 
   Row floatingActionButtons(BuildContext context) => Row(
@@ -162,8 +159,8 @@ class CounterDisplay extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            Text(
+              context<DisposableService>().title,
             ),
             Text(
               '${context<AppChangeNotifier>().counter}',
