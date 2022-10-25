@@ -14,6 +14,8 @@ dependencies:
 
 dev_dependencies:
   austerity: ^0.0.9-beta
+  example:
+    path: example
   flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
