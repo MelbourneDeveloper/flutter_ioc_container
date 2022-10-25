@@ -93,21 +93,19 @@ class MyApp extends StatelessWidget {
                 key: scopedContainerKey,
                 child: FutureBuilder(
                   future: context.getAsync<SlowService>(),
-                  builder: (c, s) => AnimatedBuilder(
-                    animation: context<AppChangeNotifier>(),
-                    builder: (context, widget) => MaterialApp(
-                      title:
-                          s.data?.title ?? context<DisposableService>().title,
-                      theme: context<AppChangeNotifier>().themeData,
-                      home: Scaffold(
-                        appBar: AppBar(
-                          title: s.data != null
-                              ? Text(s.data!.title)
-                              : const CircularProgressIndicator.adaptive(),
-                        ),
-                        body: const CounterDisplay(),
-                        floatingActionButton: floatingActionButtons(context),
+                  builder: (futureBuilderContext, snapshot) => MaterialApp(
+                    title: snapshot.data?.title ??
+                        futureBuilderContext<DisposableService>().title,
+                    theme: futureBuilderContext<AppChangeNotifier>().themeData,
+                    home: Scaffold(
+                      appBar: AppBar(
+                        title: snapshot.data != null
+                            ? Text(snapshot.data!.title)
+                            : const CircularProgressIndicator.adaptive(),
                       ),
+                      body: const CounterDisplay(),
+                      floatingActionButton:
+                          floatingActionButtons(futureBuilderContext),
                     ),
                   ),
                 ),
