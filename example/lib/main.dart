@@ -15,7 +15,7 @@ final darkTheme = ThemeData(
 );
 
 class AppChangeNotifier extends ChangeNotifier {
-  AppChangeNotifier(this.themeNotifier);
+  AppChangeNotifier(this.themeNotifier, this.disposableService);
 
   int counter = 0;
 
@@ -27,11 +27,18 @@ class AppChangeNotifier extends ChangeNotifier {
   }
 
   final ThemeChangeNotifier themeNotifier;
+  final DisposableService disposableService;
 
   void increment() {
     counter++;
     themeNotifier.isDark = counter.isOdd;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    debugPrint('Disposed of the app change notifier');
   }
 }
 
@@ -44,6 +51,12 @@ class ThemeChangeNotifier extends ChangeNotifier {
   }
 
   ThemeData get themeData => isDark ? darkTheme : lightTheme;
+}
+
+class DisposableService {
+  void dispose() {
+    debugPrint('Disposed of the disposable service');
+  }
 }
 
 void main() {
@@ -60,9 +73,14 @@ IocContainerBuilder compose({bool allowOverrides = false}) =>
       allowOverrides: allowOverrides,
     )
       ..addSingletonService(ThemeChangeNotifier())
+      ..add(
+        (container) => DisposableService(),
+        dispose: (d) => d.dispose(),
+      )
       ..addSingleton(
         (container) => AppChangeNotifier(
           container<ThemeChangeNotifier>(),
+          container<DisposableService>(),
         ),
       );
 
@@ -72,39 +90,59 @@ class MyApp extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => ScopedContainerWidget(
-        child: AnimatedBuilder(
-          animation: context<ThemeChangeNotifier>(),
-          builder: (context, widget) => MaterialApp(
-            title: title,
-            theme: context<ThemeChangeNotifier>().themeData,
-            home: Scaffold(
-              appBar: AppBar(
-                title: const Text(title),
-              ),
-              body: context<AppChangeNotifier>().displayCounter
-                  ? const CounterDisplay()
-                  : const Text('X'),
-              floatingActionButton: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FloatingActionButton(
-                    onPressed: () =>
-                        context<AppChangeNotifier>().displayCounter = false,
-                    tooltip: 'Remove Counter',
-                    child: const Icon(Icons.close),
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: context<AppChangeNotifier>(),
+        builder: (context, widget) => context<AppChangeNotifier>()
+                .displayCounter
+            ? ScopedContainerWidget(
+                child: AnimatedBuilder(
+                  animation: context<ThemeChangeNotifier>(),
+                  builder: (context, widget) => MaterialApp(
+                    title: title,
+                    theme: context<ThemeChangeNotifier>().themeData,
+                    home: Scaffold(
+                      appBar: AppBar(
+                        title: const Text(title),
+                      ),
+                      body: const CounterDisplay(),
+                      floatingActionButton: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                            onPressed: () => context<AppChangeNotifier>()
+                                .displayCounter = false,
+                            tooltip: 'Remove Counter',
+                            child: const Icon(Icons.close),
+                          ),
+                          FloatingActionButton(
+                            onPressed: context<AppChangeNotifier>().increment,
+                            tooltip: 'Increment',
+                            child: const Icon(Icons.add),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  FloatingActionButton(
-                    onPressed: context<AppChangeNotifier>().increment,
-                    tooltip: 'Increment',
-                    child: const Icon(Icons.add),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+                ),
+              )
+            : const ClosedWidget(),
       );
+}
+
+///This is a blank widget that displays when the app is closed
+class ClosedWidget extends StatelessWidget {
+  const ClosedWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(
+        body: Text('X'),
+      ),
+    );
+  }
 }
 
 class CounterDisplay extends StatelessWidget {
