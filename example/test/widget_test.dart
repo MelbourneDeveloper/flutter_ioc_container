@@ -3,11 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class FakeDisposableService implements DisposableService {
+  bool isDisposed = false;
+
+  @override
+  void dispose() => isDisposed = true;
+
+  @override
+  String get title => 'asdasd';
+}
+
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    var builder = compose(allowOverrides: true)
-      ..addSingletonService(
-        ThemeChangeNotifier(),
+  testWidgets('Counter increments smoke test', (tester) async {
+    final builder = compose(allowOverrides: true)
+      ..add<DisposableService>(
+        (container) => FakeDisposableService(),
+        dispose: (service) => service.dispose(),
       );
 
     final compositionWidget = ContainerWidget(
@@ -17,6 +28,7 @@ void main() {
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(compositionWidget);
+    await tester.pumpAndSettle();
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
@@ -29,5 +41,17 @@ void main() {
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+
+    final scopeState = tester
+        .state<ScopedContainerWidgetState>(find.byType(ScopedContainerWidget));
+
+    final disposable =
+        scopeState.scope.get<DisposableService>() as FakeDisposableService;
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+
+    expect(disposable.isDisposed, true);
   });
 }

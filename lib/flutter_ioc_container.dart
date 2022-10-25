@@ -117,7 +117,7 @@ class ScopedContainerWidget extends StatefulWidget {
   final Widget child;
 
   @override
-  State<ScopedContainerWidget> createState() => _ScopedContainerWidgetState();
+  State<ScopedContainerWidget> createState() => ScopedContainerWidgetState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -126,7 +126,8 @@ class ScopedContainerWidget extends StatefulWidget {
   }
 }
 
-class _ScopedContainerWidgetState extends State<ScopedContainerWidget> {
+///The staate of the ScopedContainerWidget
+class ScopedContainerWidgetState extends State<ScopedContainerWidget> {
   ///The scoped container for this widget
   late final IocContainer scope;
 

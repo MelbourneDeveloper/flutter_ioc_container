@@ -9,7 +9,7 @@ packages:
     source: hosted
     version: "2.9.0"
   austerity:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: austerity
       url: "https://pub.dartlang.org"
