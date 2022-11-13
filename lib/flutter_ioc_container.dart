@@ -8,11 +8,16 @@ import 'package:ioc_container/ioc_container.dart';
 ///the tree. Put one at the root of your app
 class ContainerWidget extends InheritedWidget {
   ///Creates a [ContainerWidget]
-  const ContainerWidget({
-    required this.container,
+  ContainerWidget({
     required super.child,
+    IocContainer? container,
+    IocContainer Function(IocContainerBuilder builder)? compose,
     super.key,
-  });
+  })  : container = container ?? compose!(IocContainerBuilder()),
+        assert(
+          compose != null || container != null,
+          'You must specify a container or a compose method.',
+        );
 
   ///The IoC container. This is the container that will be used by all widgets.
   ///Use [IocContainerBuilder] to compose your dependencies and then call
@@ -150,7 +155,7 @@ class ScopedContainerWidgetState extends State<ScopedContainerWidget> {
     assert(scope != null, 'No ContainerWidget found in context');
 
     return ContainerWidget(
-      container: scope!,
+      container: scope,
       child: widget.child,
     );
   }
