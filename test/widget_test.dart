@@ -15,16 +15,7 @@ class FakeDisposableService implements DisposableService {
 
 void main() {
   testWidgets('Counter increments smoke test', (tester) async {
-    final builder = compose(allowOverrides: true)
-      ..add<DisposableService>(
-        (container) => FakeDisposableService(),
-        dispose: (service) => service.dispose(),
-      );
-
-    final compositionWidget = ContainerWidget(
-      container: builder.toContainer(),
-      child: const AppRoot(),
-    );
+    const compositionWidget = AppRootRoot();
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(compositionWidget);

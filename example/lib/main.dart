@@ -51,33 +51,42 @@ class SlowService {
 
 void main() {
   runApp(
-    ContainerWidget(
-      container: compose().toContainer(),
-      child: const AppRoot(),
-    ),
+    AppRootRoot(),
   );
 }
 
-IocContainerBuilder compose({bool allowOverrides = false}) =>
-    IocContainerBuilder(
-      allowOverrides: allowOverrides,
-    )
-      //Singetons
-      ..addSingletonAsync(
-        (container) async => Future<SlowService>.delayed(
-          const Duration(seconds: 5),
-          SlowService.new,
-        ),
-      )
-      ..addSingleton(
-        (container) => AppChangeNotifier(),
-      )
+class AppRootRoot extends StatelessWidget {
+  AppRootRoot({
+    super.key,
+    this.configureOverrides,
+  });
 
-      //Transient
-      ..add(
-        (container) => DisposableService(),
-        dispose: (d) => d.dispose(),
+  final IocContainerBuilder Function(IocContainerBuilder builder)?
+      configureOverrides;
+
+  @override
+  Widget build(BuildContext context) => ContainerWidget(
+        compose: (builder) =>
+            //Singetons
+            builder
+              ..addSingletonAsync(
+                (container) async => Future<SlowService>.delayed(
+                  const Duration(seconds: 5),
+                  SlowService.new,
+                ),
+              )
+              ..addSingleton(
+                (container) => AppChangeNotifier(),
+              )
+
+              //Transient
+              ..add(
+                (container) => DisposableService(),
+                dispose: (d) => d.dispose(),
+              ),
+        child: const AppRoot(),
       );
+}
 
 class AppRoot extends StatelessWidget {
   const AppRoot({
