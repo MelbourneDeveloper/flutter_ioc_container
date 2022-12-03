@@ -3,6 +3,10 @@ import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 import 'package:ioc_container/ioc_container.dart';
 
 class AppChangeNotifier extends ChangeNotifier {
+  AppChangeNotifier(this.disposableService);
+
+  final DisposableService disposableService;
+
   bool get isDark => _isDark;
   set isDark(bool value) {
     _isDark = value;
@@ -12,6 +16,10 @@ class AppChangeNotifier extends ChangeNotifier {
   bool get displayCounter => _displayCounter;
   set displayCounter(bool value) {
     _displayCounter = value;
+    if (!value) {
+      disposableService.dispose();
+    }
+
     notifyListeners();
   }
 
@@ -77,7 +85,7 @@ class AppRootRoot extends StatelessWidget {
               ),
             )
             ..addSingleton(
-              (container) => AppChangeNotifier(),
+              (container) => AppChangeNotifier(container<DisposableService>(),),
             )
 
             //Transient
