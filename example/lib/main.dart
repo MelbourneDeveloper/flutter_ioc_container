@@ -51,56 +51,46 @@ class SlowService {
 
 void main() {
   runApp(
-    const AppRootRoot(
-      child: AppRoot(),
-    ),
+    const AppRoot(),
   );
 }
 
-class AppRootRoot extends StatelessWidget {
-  const AppRootRoot({
-    required this.child,
+class AppRoot extends StatelessWidget {
+  const AppRoot({
     super.key,
     this.configureOverrides,
   });
 
   final IocContainerBuilder Function(IocContainerBuilder builder)?
       configureOverrides;
-  final Widget child;
 
   @override
   Widget build(BuildContext context) => ContainerWidget(
-        compose: (builder) {
-          builder
-            ..
-                //Singetons
-                addSingletonAsync(
-              (container) async => Future<SlowService>.delayed(
-                const Duration(seconds: 5),
-                SlowService.new,
-              ),
-            )
-            ..addSingleton(
-              (container) => AppChangeNotifier(),
-            )
+        configureOverrides: configureOverrides,
+        compose: (builder) => builder
+          ..
+              //Singetons
+              addSingletonAsync(
+            (container) async => Future<SlowService>.delayed(
+              const Duration(seconds: 5),
+              SlowService.new,
+            ),
+          )
+          ..addSingleton(
+            (container) => AppChangeNotifier(),
+          )
 
-            //Transient
-            ..add(
-              (container) => DisposableService(),
-              dispose: (d) => d.dispose(),
-            );
-
-          configureOverrides?.call(builder);
-
-          return builder;
-        },
-        allowOverrides: true,
-        child: child,
+          //Transient
+          ..add(
+            (container) => DisposableService(),
+            dispose: (d) => d.dispose(),
+          ),
+        child: const CounterApp(),
       );
 }
 
-class AppRoot extends StatelessWidget {
-  const AppRoot({
+class CounterApp extends StatelessWidget {
+  const CounterApp({
     super.key,
   });
 
@@ -109,43 +99,30 @@ class AppRoot extends StatelessWidget {
         animation: context<AppChangeNotifier>(),
         builder: (context, widget) => FutureBuilder(
           future: context.getAsync<SlowService>(),
-          builder: (materialAppContext, snapshot) =>
-              CounterApp(title: snapshot.data?.title),
-        ),
-      );
-}
-
-class CounterApp extends StatelessWidget {
-  const CounterApp({
-    required this.title,
-    super.key,
-  });
-
-  final String? title;
-
-  @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: title ?? '',
-        theme: context<AppChangeNotifier>().themeData,
-        home: Scaffold(
-          appBar: AppBar(
-            title: title != null
-                ? Text(title!)
-                : const CircularProgressIndicator.adaptive(),
-          ),
-          body: context<AppChangeNotifier>().displayCounter
-              ? const ScopedContainerWidget(
-                  child: CounterDisplay(),
-                )
-              : const Align(
-                  child: Text(
-                    'X',
-                    style: TextStyle(
-                      fontSize: 50,
+          builder: (materialAppContext, snapshot) => MaterialApp(
+            title: snapshot.data?.title ?? '',
+            theme: context<AppChangeNotifier>().themeData,
+            home: Scaffold(
+              appBar: AppBar(
+                title: snapshot.data?.title != null
+                    ? Text(snapshot.data!.title)
+                    : const CircularProgressIndicator.adaptive(),
+              ),
+              body: context<AppChangeNotifier>().displayCounter
+                  ? const ScopedContainerWidget(
+                      child: CounterDisplay(),
+                    )
+                  : const Align(
+                      child: Text(
+                        'X',
+                        style: TextStyle(
+                          fontSize: 50,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-          floatingActionButton: floatingActionButtons(context),
+              floatingActionButton: floatingActionButtons(context),
+            ),
+          ),
         ),
       );
 

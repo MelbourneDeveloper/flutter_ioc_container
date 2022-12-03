@@ -11,21 +11,34 @@ class ContainerWidget extends InheritedWidget {
   ContainerWidget({
     required super.child,
     IocContainer? container,
-    IocContainerBuilder Function(IocContainerBuilder builder)? compose,
-    bool allowOverrides = false,
+    void Function(IocContainerBuilder builder)? compose,
     super.key,
-  })  : container = container ??
-            compose!(IocContainerBuilder(allowOverrides: allowOverrides))
-                .toContainer(),
-        assert(
+    this.configureOverrides,
+    // ignore: prefer_initializing_formals
+  }) : assert(
           compose != null || container != null,
           'You must specify a container or a compose method.',
-        );
+        ) {
+    if (container == null) {
+      final iocContainerBuilder =
+          IocContainerBuilder(allowOverrides: configureOverrides != null);
+      compose!(
+        iocContainerBuilder,
+      );
+      configureOverrides?.call(iocContainerBuilder);
+      container = iocContainerBuilder.toContainer();
+    }
+  }
+
+  ///Allows overrides for testing
+  final void Function(IocContainerBuilder builder)?
+      // ignore: diagnostic_describe_all_properties
+      configureOverrides;
 
   ///The IoC container. This is the container that will be used by all widgets.
   ///Use [IocContainerBuilder] to compose your dependencies and then call
   ///[IocContainerBuilder.toContainer] to get the container
-  final IocContainer container;
+  late final IocContainer container;
 
   ///Get an instance of the service by type
   static T get<T extends Object>(
