@@ -123,9 +123,9 @@ extension IocContainerBuildContextExtensions on BuildContext {
 
 ///This widget is used to create a new scope. Use this to
 ///hold state
-class ScopedContainerWidget extends StatefulWidget {
-  ///Creates a [ScopedContainerWidget]
-  const ScopedContainerWidget({
+class Scope extends StatefulWidget {
+  ///Creates a [Scope]
+  const Scope({
     required this.child,
     this.useExistingSingletons = true,
     super.key,
@@ -139,7 +139,7 @@ class ScopedContainerWidget extends StatefulWidget {
   final Widget child;
 
   @override
-  State<ScopedContainerWidget> createState() => ScopedContainerWidgetState();
+  State<Scope> createState() => ScopeState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -149,12 +149,12 @@ class ScopedContainerWidget extends StatefulWidget {
 }
 
 ///The staate of the ScopedContainerWidget
-class ScopedContainerWidgetState extends State<ScopedContainerWidget> {
+class ScopeState extends State<Scope> {
   ///The scoped container for this widget
   IocContainer? scope;
 
   @override
-  void didUpdateWidget(ScopedContainerWidget oldWidget) {
+  void didUpdateWidget(Scope oldWidget) {
     super.didUpdateWidget(oldWidget);
     scope ??=
         context.scoped(useExistingSingletons: widget.useExistingSingletons);

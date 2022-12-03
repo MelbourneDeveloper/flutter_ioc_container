@@ -39,8 +39,7 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
 
-    final scopeState = tester
-        .state<ScopedContainerWidgetState>(find.byType(ScopedContainerWidget));
+    final scopeState = tester.state<ScopeState>(find.byType(Scope));
 
     final disposable =
         scopeState.scope!.get<DisposableService>() as FakeDisposableService;

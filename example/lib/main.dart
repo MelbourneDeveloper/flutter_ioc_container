@@ -61,8 +61,7 @@ class AppRoot extends StatelessWidget {
     this.configureOverrides,
   });
 
-  final void Function(IocContainerBuilder builder)?
-      configureOverrides;
+  final void Function(IocContainerBuilder builder)? configureOverrides;
 
   @override
   Widget build(BuildContext context) => CompositionRoot(
@@ -109,7 +108,7 @@ class CounterApp extends StatelessWidget {
                     : const CircularProgressIndicator.adaptive(),
               ),
               body: context<AppChangeNotifier>().displayCounter
-                  ? const ScopedContainerWidget(
+                  ? const Scope(
                       child: CounterDisplay(),
                     )
                   : const Align(
