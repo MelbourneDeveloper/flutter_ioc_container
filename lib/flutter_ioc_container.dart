@@ -6,14 +6,14 @@ import 'package:ioc_container/ioc_container.dart';
 
 ///This widget houses the IoC container and we propagate this to all widgets in
 ///the tree. Put one at the root of your app
-class ContainerWidget extends InheritedWidget {
-  ///Creates a [ContainerWidget]
-  ContainerWidget({
+class CompositionRoot extends InheritedWidget {
+  ///Creates a [CompositionRoot]
+  CompositionRoot({
     required super.child,
     IocContainer? container,
     void Function(IocContainerBuilder builder)? compose,
-    super.key,
     this.configureOverrides,
+    super.key,
   }) : assert(
           compose != null || container != null,
           'You must specify a container or a compose method.',
@@ -76,9 +76,9 @@ class ContainerWidget extends InheritedWidget {
             useExistingSingletons: useExistingSingletons,
           );
 
-  static ContainerWidget _guard(BuildContext context) {
+  static CompositionRoot _guard(BuildContext context) {
     final container =
-        context.dependOnInheritedWidgetOfExactType<ContainerWidget>();
+        context.dependOnInheritedWidgetOfExactType<CompositionRoot>();
     assert(container != null, 'No Container found in context');
     return container!;
   }
@@ -96,26 +96,26 @@ class ContainerWidget extends InheritedWidget {
 ///BuildContext extensions for ContainerWidget
 extension IocContainerBuildContextExtensions on BuildContext {
   ///Get an instance of the service by type
-  T get<T extends Object>() => ContainerWidget.get<T>(this);
+  T get<T extends Object>() => CompositionRoot.get<T>(this);
 
   ///Shortcut for [get]
-  T call<T extends Object>() => ContainerWidget.get<T>(this);
+  T call<T extends Object>() => CompositionRoot.get<T>(this);
 
   ///Gets a service that requires async initialization. Add these services with [IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync] You can only use this on factories that return a Future<>. Warning: if the definition is singleton/scoped and the Future fails, the factory will never return a valid value, so use [getAsyncSafe] to ensure the container doesn't store failed singletons
-  Future<T> getAsync<T extends Object>() => ContainerWidget.getAsync<T>(this);
+  Future<T> getAsync<T extends Object>() => CompositionRoot.getAsync<T>(this);
 
   ///See [getAsync]. Safely makes an async call by creating a temporary scoped container, attempting to make the async initialization and merging the result with the current container if there is success. You don't need call this inside a factory (in your composition). Only call this from the outside, and handle the errors/timeouts gracefully. Warning: this does not do error handling and this also allows reentrancy. If you call this more than once in parallel it will create multiple Futures - i.e. make multiple async calls. You need to guard against this and perform retries on failure.
   Future<T> getAsyncSafe<T extends Object>() =>
-      ContainerWidget.getAsyncSafe<T>(this);
+      CompositionRoot.getAsyncSafe<T>(this);
 
   ///Gets a service, but each service in the object mesh will have only one
   ///instance. If you want to get multiple scoped objects, call [scoped] to
   ///get a reusable [IocContainer] and then call [get] or [getAsync] on that.
-  T getScoped<T extends Object>() => ContainerWidget.getScoped<T>(this);
+  T getScoped<T extends Object>() => CompositionRoot.getScoped<T>(this);
 
   ///Creates a new Ioc Container for a particular scope. Does not use existing singletons/scope by default. Warning: if you use the existing singletons, calling dispose will dispose those singletons
   IocContainer scoped({bool useExistingSingletons = true}) =>
-      ContainerWidget.scoped(
+      CompositionRoot.scoped(
         this,
         useExistingSingletons: useExistingSingletons,
       );
@@ -171,7 +171,7 @@ class ScopedContainerWidgetState extends State<ScopedContainerWidget> {
   Widget build(BuildContext context) {
     assert(scope != null, 'No ContainerWidget found in context');
 
-    return ContainerWidget(
+    return CompositionRoot(
       container: scope,
       child: widget.child,
     );

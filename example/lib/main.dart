@@ -61,11 +61,11 @@ class AppRoot extends StatelessWidget {
     this.configureOverrides,
   });
 
-  final IocContainerBuilder Function(IocContainerBuilder builder)?
+  final void Function(IocContainerBuilder builder)?
       configureOverrides;
 
   @override
-  Widget build(BuildContext context) => ContainerWidget(
+  Widget build(BuildContext context) => CompositionRoot(
         configureOverrides: configureOverrides,
         compose: (builder) => builder
           ..
