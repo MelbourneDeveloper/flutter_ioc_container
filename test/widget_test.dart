@@ -19,6 +19,7 @@ void main() {
       configureOverrides: (builder) => builder
         ..add<DisposableService>(
           (container) => FakeDisposableService(),
+          dispose: (service) => service.dispose(),
         ),
     );
 
