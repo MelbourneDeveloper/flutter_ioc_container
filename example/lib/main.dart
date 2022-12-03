@@ -51,12 +51,12 @@ class SlowService {
 
 void main() {
   runApp(
-    AppRootRoot(),
+    const AppRootRoot(),
   );
 }
 
 class AppRootRoot extends StatelessWidget {
-  AppRootRoot({
+  const AppRootRoot({
     super.key,
     this.configureOverrides,
   });
@@ -66,24 +66,31 @@ class AppRootRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ContainerWidget(
-        compose: (builder) => configureOverrides!(builder)
-          ..
-              //Singetons
-              addSingletonAsync(
-            (container) async => Future<SlowService>.delayed(
-              const Duration(seconds: 5),
-              SlowService.new,
-            ),
-          )
-          ..addSingleton(
-            (container) => AppChangeNotifier(),
-          )
+        compose: (builder) {
+          builder
+            ..
+                //Singetons
+                addSingletonAsync(
+              (container) async => Future<SlowService>.delayed(
+                const Duration(seconds: 5),
+                SlowService.new,
+              ),
+            )
+            ..addSingleton(
+              (container) => AppChangeNotifier(),
+            )
 
-          //Transient
-          ..add(
-            (container) => DisposableService(),
-            dispose: (d) => d.dispose(),
-          ),
+            //Transient
+            ..add(
+              (container) => DisposableService(),
+              dispose: (d) => d.dispose(),
+            );
+
+          configureOverrides?.call(builder);
+
+          return builder;
+        },
+        allowOverrides: true,
         child: const AppRoot(),
       );
 }

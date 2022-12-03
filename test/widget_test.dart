@@ -17,7 +17,7 @@ void main() {
   testWidgets('Counter increments smoke test', (tester) async {
     final compositionWidget = AppRootRoot(
       configureOverrides: (builder) => builder
-        ..addSingleton<DisposableService>(
+        ..add<DisposableService>(
           (container) => FakeDisposableService(),
         ),
     );

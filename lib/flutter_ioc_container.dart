@@ -12,8 +12,11 @@ class ContainerWidget extends InheritedWidget {
     required super.child,
     IocContainer? container,
     IocContainerBuilder Function(IocContainerBuilder builder)? compose,
+    bool allowOverrides = false,
     super.key,
-  })  : container = container ?? compose!(IocContainerBuilder()).toContainer(),
+  })  : container = container ??
+            compose!(IocContainerBuilder(allowOverrides: allowOverrides))
+                .toContainer(),
         assert(
           compose != null || container != null,
           'You must specify a container or a compose method.',
