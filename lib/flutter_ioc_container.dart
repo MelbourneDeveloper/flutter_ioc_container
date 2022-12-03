@@ -14,7 +14,6 @@ class ContainerWidget extends InheritedWidget {
     void Function(IocContainerBuilder builder)? compose,
     super.key,
     this.configureOverrides,
-    // ignore: prefer_initializing_formals
   }) : assert(
           compose != null || container != null,
           'You must specify a container or a compose method.',
@@ -26,7 +25,9 @@ class ContainerWidget extends InheritedWidget {
         iocContainerBuilder,
       );
       configureOverrides?.call(iocContainerBuilder);
-      container = iocContainerBuilder.toContainer();
+      this.container = iocContainerBuilder.toContainer();
+    } else {
+      this.container = container;
     }
   }
 
