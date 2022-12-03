@@ -51,18 +51,22 @@ class SlowService {
 
 void main() {
   runApp(
-    const AppRootRoot(),
+    const AppRootRoot(
+      child: AppRoot(),
+    ),
   );
 }
 
 class AppRootRoot extends StatelessWidget {
   const AppRootRoot({
+    required this.child,
     super.key,
     this.configureOverrides,
   });
 
   final IocContainerBuilder Function(IocContainerBuilder builder)?
       configureOverrides;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) => ContainerWidget(
@@ -91,7 +95,7 @@ class AppRootRoot extends StatelessWidget {
           return builder;
         },
         allowOverrides: true,
-        child: const AppRoot(),
+        child: child,
       );
 }
 
