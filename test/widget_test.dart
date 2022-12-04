@@ -15,19 +15,16 @@ class FakeDisposableService implements DisposableService {
 
 void main() {
   testWidgets('Counter increments smoke test', (tester) async {
-    final builder = compose(allowOverrides: true)
-      ..add<DisposableService>(
-        (container) => FakeDisposableService(),
-        dispose: (service) => service.dispose(),
-      );
-
-    final compositionWidget = ContainerWidget(
-      container: builder.toContainer(),
-      child: const AppRoot(),
+    final appRoot = AppRoot(
+      configureOverrides: (builder) => builder
+        ..add<DisposableService>(
+          (container) => FakeDisposableService(),
+          dispose: (service) => service.dispose(),
+        ),
     );
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(compositionWidget);
+    await tester.pumpWidget(appRoot);
     await tester.pumpAndSettle();
 
     // Verify that our counter starts at 0.
@@ -42,8 +39,7 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
 
-    final scopeState = tester
-        .state<ScopedContainerWidgetState>(find.byType(ScopedContainerWidget));
+    final scopeState = tester.state<ScopeState>(find.byType(Scope));
 
     final disposable =
         scopeState.scope!.get<DisposableService>() as FakeDisposableService;
