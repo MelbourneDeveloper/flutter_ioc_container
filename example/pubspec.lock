@@ -15,6 +15,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.9-beta"
+  bloobit:
+    dependency: "direct main"
+    description:
+      name: bloobit
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.5-beta"
   boolean_selector:
     dependency: transitive
     description:
