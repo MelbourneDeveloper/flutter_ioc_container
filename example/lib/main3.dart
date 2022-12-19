@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 import 'package:ioc_container/ioc_container.dart';
 
+//This version should work but for some reason the bloobit gets
+//created again and again. Is this a bug?
+
 class AppState {
   AppState(this.counter);
 
@@ -16,8 +19,6 @@ class AppBloobit extends Bloobit<AppState> {
 
   void increment() => setState(state.copyWith(counter: state.counter + 1));
 }
-
-IocContainer container = compose().toContainer();
 
 IocContainerBuilder compose() => IocContainerBuilder()
   ..add(
@@ -41,75 +42,54 @@ class AppRoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CompositionRoot(
         configureOverrides: configureOverrides,
-        container: container,
-        child: CounterApp(),
+        container: compose().toContainer(),
+        child: const CounterApp(),
       );
 }
 
 class CounterApp extends StatelessWidget {
-  CounterApp({
+  const CounterApp({
     // ignore: unused_element
     super.key,
   });
-  final bloobit = container<AppBloobit>();
+
   @override
-  Widget build(BuildContext context) {
-    final scope = Scope(
-      child: BloobitWidget(
-        bloobit: bloobit,
-        builder: (context, widget) => MaterialApp(
-          title: 'sample',
-          home: Scaffold(
-            appBar: AppBar(
-              title: const Text('sample'),
+  Widget build(BuildContext context) => Scope(
+        builder: (context, scope) => BloobitWidget(
+          bloobit: scope<AppBloobit>(),
+          builder: (context, widget) => MaterialApp(
+            title: 'sample',
+            home: Scaffold(
+              appBar: AppBar(
+                title: const Text('sample'),
+              ),
+              body: Align(
+                child: SizedBox(
+                  height: 60,
+                  width: 300,
+                  child: ElevatedButton(
+                    onPressed: scope<AppBloobit>().increment,
+                    child: CounterDisplay(),
+                  ),
+                ),
+              ),
             ),
-            body: CounterDisplay(),
-            floatingActionButton: floatingActionButtons(context),
           ),
         ),
-      ),
-    );
-    return scope;
-  }
-
-  Row floatingActionButtons(BuildContext context) => Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          const SizedBox(
-            width: 10,
-          ),
-          FloatingActionButton(
-            onPressed: bloobit.increment,
-            tooltip: 'Increment',
-            child: const Icon(Icons.add),
-          ),
-        ],
       );
 }
 
 class CounterDisplay extends StatelessWidget {
-  factory CounterDisplay() => CounterDisplay._internal(
-        appBloobit: container<AppBloobit>(),
-      );
-
-  const CounterDisplay._internal({
-    required this.appBloobit,
-    // ignore: unused_element
-    super.key,
-  });
-
-  final AppBloobit appBloobit;
+  // ignore: prefer_const_constructors_in_immutables
+  CounterDisplay({super.key});
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              '${appBloobit.state.counter}',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        child: Text(
+          '${context<AppBloobit>().state.counter}',
+          style: Theme.of(context).textTheme.headline4!.copyWith(
+                color: Colors.white,
+              ),
         ),
       );
 }

@@ -126,7 +126,7 @@ extension IocContainerBuildContextExtensions on BuildContext {
 class Scope extends StatefulWidget {
   ///Creates a [Scope]
   const Scope({
-    required this.child,
+    required this.builder,
     this.useExistingSingletons = true,
     super.key,
   });
@@ -136,15 +136,20 @@ class Scope extends StatefulWidget {
   final bool useExistingSingletons;
 
   ///The child widget
-  final Widget child;
+  final Widget Function(BuildContext context, IocContainer scope) builder;
 
   @override
   State<Scope> createState() => ScopeState();
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Widget>('child', child));
+    properties.add(
+      ObjectFlagProperty<
+          Widget Function(
+        BuildContext context,
+        IocContainer scope,
+      )>.has('builder', builder),
+    );
   }
 }
 
@@ -171,9 +176,9 @@ class ScopeState extends State<Scope> {
   Widget build(BuildContext context) {
     assert(scope != null, 'No ContainerWidget found in context');
 
-    return CompositionRoot(
-      container: scope,
-      child: widget.child,
+    return widget.builder(
+      context,
+      scope!,
     );
   }
 
