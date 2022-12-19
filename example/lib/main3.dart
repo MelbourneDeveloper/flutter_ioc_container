@@ -69,7 +69,7 @@ class CounterApp extends StatelessWidget {
                   width: 300,
                   child: ElevatedButton(
                     onPressed: scope<AppBloobit>().increment,
-                    child: CounterDisplay(),
+                    child: const CounterDisplay(),
                   ),
                 ),
               ),
@@ -80,8 +80,7 @@ class CounterApp extends StatelessWidget {
 }
 
 class CounterDisplay extends StatelessWidget {
-  // ignore: prefer_const_constructors_in_immutables
-  CounterDisplay({super.key});
+  const CounterDisplay({super.key});
 
   @override
   Widget build(BuildContext context) => Center(
