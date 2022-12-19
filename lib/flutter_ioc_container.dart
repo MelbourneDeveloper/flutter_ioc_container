@@ -176,9 +176,12 @@ class ScopeState extends State<Scope> {
   Widget build(BuildContext context) {
     assert(scope != null, 'No ContainerWidget found in context');
 
-    return widget.builder(
-      context,
-      scope!,
+    return CompositionRoot(
+      container: scope,
+      child: widget.builder(
+        context,
+        scope!,
+      ),
     );
   }
 
