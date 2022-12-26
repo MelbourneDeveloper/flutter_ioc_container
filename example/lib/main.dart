@@ -88,12 +88,24 @@ class CounterDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Text(
-          '$counter',
-          style: Theme.of(context).textTheme.headline4!.copyWith(
-                color: Colors.white,
-              ),
-        ),
+        child: CounterText(counter: counter),
+      );
+}
+
+class CounterText extends StatelessWidget {
+  const CounterText({
+    required this.counter,
+    super.key,
+  });
+
+  final int counter;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        '$counter',
+        style: Theme.of(context).textTheme.headline4!.copyWith(
+              color: Colors.white,
+            ),
       );
 }
 
