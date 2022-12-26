@@ -23,6 +23,11 @@ IocContainerBuilder compose() => IocContainerBuilder()
   )
   ..add(
     (container) => CounterDisplay(
+      scope: container,
+    ),
+  )
+  ..add(
+    (container) => CounterText(
       counter: container<AppBloobit>().state.counter,
     ),
   );
@@ -78,18 +83,24 @@ class CounterApp extends StatelessWidget {
       );
 }
 
-class CounterDisplay extends StatelessWidget {
+class CounterDisplay extends ScopedStatelessWidget {
   const CounterDisplay({
-    required this.counter,
+    required super.scope,
     super.key,
   });
 
-  final int counter;
-
   @override
   Widget build(BuildContext context) => Center(
-        child: CounterText(counter: counter),
+        child: scope<CounterText>(isTransient: true),
       );
+}
+
+abstract class ScopedStatelessWidget extends StatelessWidget {
+  const ScopedStatelessWidget({
+    required this.scope,
+    super.key,
+  });
+  final IocContainer scope;
 }
 
 class CounterText extends StatelessWidget {
