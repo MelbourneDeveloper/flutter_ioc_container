@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 import 'package:ioc_container/ioc_container.dart';
 
-//This version should work but for some reason the bloobit gets
-//created again and again. Is this a bug?
-
 class AppState {
   AppState(this.counter);
 
@@ -69,7 +66,7 @@ class CounterApp extends StatelessWidget {
                   width: 300,
                   child: ElevatedButton(
                     onPressed: scope<AppBloobit>().increment,
-                    child: const CounterDisplay(),
+                    child: CounterDisplay(scope: scope),
                   ),
                 ),
               ),
@@ -80,12 +77,17 @@ class CounterApp extends StatelessWidget {
 }
 
 class CounterDisplay extends StatelessWidget {
-  const CounterDisplay({super.key});
+  const CounterDisplay({
+    required this.scope,
+    super.key,
+  });
+
+  final IocContainer scope;
 
   @override
   Widget build(BuildContext context) => Center(
         child: Text(
-          '${context<AppBloobit>().state.counter}',
+          '${scope<AppBloobit>().state.counter}',
           style: Theme.of(context).textTheme.headline4!.copyWith(
                 color: Colors.white,
               ),
