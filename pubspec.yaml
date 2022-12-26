@@ -2,6 +2,7 @@ name: flutter_ioc_container
 description: A Flutter extension for the ioc_container package
 version: 0.0.1-beta
 repository: https://github.com/MelbourneDeveloper/flutter_ioc_container
+publish_to: 'none'
 
 environment:
   sdk: '>=2.18.2 <3.0.0'
@@ -10,7 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ioc_container: ^1.0.5
+  ioc_container: 
+    path: ../ioc_container
 
 dev_dependencies:
   austerity: ^0.0.9-beta

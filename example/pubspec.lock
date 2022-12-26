@@ -91,10 +91,10 @@ packages:
   ioc_container:
     dependency: "direct main"
     description:
-      name: ioc_container
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.5"
+      path: "../../ioc_container"
+      relative: true
+    source: path
+    version: "1.0.8"
   lints:
     dependency: transitive
     description:

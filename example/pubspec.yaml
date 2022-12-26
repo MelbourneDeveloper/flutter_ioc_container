@@ -14,7 +14,8 @@ dependencies:
     sdk: flutter
   flutter_ioc_container:
     path: ../
-  ioc_container: ^1.0.5
+  ioc_container:
+    path: ../../ioc_container
 
 
 dev_dependencies:

@@ -20,6 +20,11 @@ class AppBloobit extends Bloobit<AppState> {
 IocContainerBuilder compose() => IocContainerBuilder()
   ..add(
     (container) => AppBloobit(AppState(0)),
+  )
+  ..add(
+    (container) => CounterDisplay(
+      counter: container<AppBloobit>().state.counter,
+    ),
   );
 
 void main() {
@@ -66,9 +71,7 @@ class CounterApp extends StatelessWidget {
                   width: 300,
                   child: ElevatedButton(
                     onPressed: scope<AppBloobit>().increment,
-                    child: CounterDisplay(
-                      counter: scope<AppBloobit>().state.counter,
-                    ),
+                    child: scope<CounterDisplay>(isTransient: true),
                   ),
                 ),
               ),
