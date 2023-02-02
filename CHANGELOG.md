@@ -6,3 +6,5 @@ Strip the package back to the well-tested components
 Tests and doco
 ## 0.3.0
 Doco
+## 0.4.0
+Doco

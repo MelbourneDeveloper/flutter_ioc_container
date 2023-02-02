@@ -30,8 +30,6 @@ final root = CompositionRoot(
 If you need a set of dependencies that have a short life and you want to dispose of them afterwards, you can use the `scoped` method to create a scoped container. Here's an example:
 
 ```dart
-
-```dart
 final root = CompositionRoot(
     container: (IocContainerBuilder()
         ..add(
@@ -54,14 +52,14 @@ final root = CompositionRoot(
 You can load the dependencies in the `State` of your widget
 
 ```dart
-  @override
-  void didChangeDependencies() {
-    final scope = context.scoped();
-    one = scope<A>();
-    two = scope<A>();
-    c = context.getScoped<C>();
-    super.didChangeDependencies();
-  }
+@override
+void didChangeDependencies() {
+final scope = context.scoped();
+one = scope<A>();
+two = scope<A>();
+c = context.getScoped<C>();
+super.didChangeDependencies();
+}
 ```
 
 ### Async Injection
