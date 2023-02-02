@@ -24,6 +24,24 @@ void main() {
     await tester.pumpWidget(root);
     expect(find.text(text), findsOneWidget);
   });
+
+  testWidgets('basic async', (tester) async {
+    const text = 'test';
+    final root = CompositionRoot(
+      compose: (builder) => builder.addAsync(
+        (container) async =>
+            Future<String>.delayed(const Duration(seconds: 1), () => text),
+      ),
+      child: const BasicAsyncWidget(),
+    );
+    await tester.pumpWidget(root);
+    expect(find.text(text), findsNothing);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text(text), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
 }
 
 class BasicWidget extends StatelessWidget {
@@ -34,5 +52,22 @@ class BasicWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         home: Text(context<String>()),
+      );
+}
+
+class BasicAsyncWidget extends StatelessWidget {
+  const BasicAsyncWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        home: FutureBuilder(
+          // ignore: discarded_futures
+          future: context.getAsync<String>(),
+          builder: (ctx, ss) => ss.connectionState == ConnectionState.done
+              ? Text(ss.data!)
+              : const CircularProgressIndicator(),
+        ),
       );
 }
