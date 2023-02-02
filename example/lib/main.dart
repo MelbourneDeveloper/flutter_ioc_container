@@ -1,5 +1,4 @@
 import 'package:bloobit/bloobit.dart';
-import 'package:example/new_stuff.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 import 'package:ioc_container/ioc_container.dart';
@@ -19,13 +18,8 @@ class AppBloobit extends Bloobit<AppState> {
 }
 
 IocContainerBuilder compose() => IocContainerBuilder()
-  ..add(
+  ..addSingleton(
     (container) => AppBloobit(AppState(0)),
-  )
-  ..add(
-    (container) => CounterDisplay(
-      scope: container,
-    ),
   )
   ..add(
     (container) => CounterText(
@@ -57,13 +51,13 @@ class AppRoot extends StatelessWidget {
 
 class CounterApp extends StatelessWidget {
   const CounterApp({
-    // ignore: unused_element
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) => BloobitScope<AppBloobit, AppState>(
-        builder: (context, scope, bloobit) => MaterialApp(
+  Widget build(BuildContext context) => BloobitWidget(
+        bloobit: context<AppBloobit>(),
+        builder: (context, bloobit) => MaterialApp(
           title: 'sample',
           home: Scaffold(
             appBar: AppBar(
@@ -75,24 +69,12 @@ class CounterApp extends StatelessWidget {
                 width: 300,
                 child: ElevatedButton(
                   onPressed: bloobit.increment,
-                  child: scope<CounterDisplay>(isTransient: true),
+                  child: context<CounterText>(),
                 ),
               ),
             ),
           ),
         ),
-      );
-}
-
-class CounterDisplay extends ScopedStatelessWidget {
-  const CounterDisplay({
-    required super.scope,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) => Center(
-        child: scope<CounterText>(isTransient: true),
       );
 }
 
@@ -107,7 +89,7 @@ class CounterText extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         '$counter',
-        style: Theme.of(context).textTheme.headline4!.copyWith(
+        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
               color: Colors.white,
             ),
       );
