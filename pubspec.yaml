@@ -1,6 +1,6 @@
 name: flutter_ioc_container
 description: A Flutter extension for the ioc_container package
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/MelbourneDeveloper/flutter_ioc_container
 
 environment:
