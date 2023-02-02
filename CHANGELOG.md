@@ -4,3 +4,5 @@ Add the package
 Strip the package back to the well-tested components
 ## 0.2.0
 Tests and doco
+## 0.3.0
+Doco
