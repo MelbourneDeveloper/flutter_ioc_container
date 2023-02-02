@@ -57,17 +57,43 @@ void main() {
 
   testWidgets('basic scoping', (tester) async {
     final root = CompositionRoot(
-      container: (IocContainerBuilder()..add((container) => A())).toContainer(),
+      container: (IocContainerBuilder()
+            ..add(
+              (container) => A(),
+            )
+            ..add(
+              (container) => B(),
+            )
+            ..add(
+              (container) => C(
+                container<B>(),
+                container<B>(),
+              ),
+            ))
+          .toContainer(),
       child: const BasicWidgetWithScope(),
     );
     await tester.pumpWidget(root);
     final state = tester
         .state<_BasicWidgetWithScopeState>(find.byType(BasicWidgetWithScope));
     expect(identical(state.one, state.two), isTrue);
+    expect(identical(state.c.b1, state.c.b2), isTrue);
   });
 }
 
 class A {}
+
+class B {}
+
+class C {
+  C(
+    this.b1,
+    this.b2,
+  );
+
+  final B b1;
+  final B b2;
+}
 
 class BasicWidget extends StatelessWidget {
   const BasicWidget({
@@ -91,12 +117,14 @@ class BasicWidgetWithScope extends StatefulWidget {
 
 class _BasicWidgetWithScopeState extends State<BasicWidgetWithScope> {
   late final A one, two;
+  late final C c;
 
   @override
   void didChangeDependencies() {
     final scope = context.scoped();
     one = scope<A>();
     two = scope<A>();
+    c = context.getScoped<C>();
     super.didChangeDependencies();
   }
 
