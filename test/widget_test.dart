@@ -35,11 +35,23 @@ void main() {
       child: const BasicAsyncWidget(),
     );
     await tester.pumpWidget(root);
+
+    //No text yet
     expect(find.text(text), findsNothing);
+
+    //Wait for 100 milliseconds
     await tester.pump(const Duration(milliseconds: 100));
+
+    //Should see spinner
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    //Wait 2 seconds
     await tester.pump(const Duration(seconds: 2));
+
+    //Should see text
     expect(find.text(text), findsOneWidget);
+
+    //Should not see spinner
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 }
