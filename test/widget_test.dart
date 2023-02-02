@@ -4,6 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ioc_container/ioc_container.dart';
 
 void main() {
+  ///This test shows how to use the CompositionRoot widget to provide
+  ///dependencies to other widgets in your application.
+  ///The dependency in this case is a text string.
   testWidgets('basic compose', (tester) async {
     const text = 'test';
     final root = CompositionRoot(
@@ -14,6 +17,9 @@ void main() {
     expect(find.text(text), findsOneWidget);
   });
 
+  ///This test shows how to create an IoC Container and use it as the source
+  ///of dependencies for your widgets.
+  ///The dependency in this case is a text string.
   testWidgets('basic container', (tester) async {
     const text = 'test';
     final root = CompositionRoot(
@@ -25,6 +31,8 @@ void main() {
     expect(find.text(text), findsOneWidget);
   });
 
+  ///This test shows how to provide an asynchronous dependency to your widgets.
+  ///The dependency in this case is a future that returns a text string.
   testWidgets('basic async', (tester) async {
     const text = 'test';
     final root = CompositionRoot(
@@ -55,6 +63,10 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
+  ///This test shows how to use scoped dependencies in your widgets.
+  ///The scoped dependencies in this case are two instances of class A and
+  ///one instance of class C, which takes two instances of class B.
+  ///Each type only ever has one instance in a scope
   testWidgets('basic scoping', (tester) async {
     final root = CompositionRoot(
       container: (IocContainerBuilder()
@@ -134,16 +146,30 @@ class _BasicWidgetWithScopeState extends State<BasicWidgetWithScope> {
       );
 }
 
-class BasicAsyncWidget extends StatelessWidget {
+class BasicAsyncWidget extends StatefulWidget {
   const BasicAsyncWidget({
     super.key,
   });
 
   @override
+  State<BasicAsyncWidget> createState() => _BasicAsyncWidgetState();
+}
+
+class _BasicAsyncWidgetState extends State<BasicAsyncWidget> {
+  late final Future<String> future;
+
+  @override
+  void didChangeDependencies() {
+    // ignore: discarded_futures
+    future = context.getAsync<String>();
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) => MaterialApp(
         home: FutureBuilder(
           // ignore: discarded_futures
-          future: context.getAsync<String>(),
+          future: future,
           builder: (ctx, ss) => ss.connectionState == ConnectionState.done
               ? Text(ss.data!)
               : const CircularProgressIndicator(),
