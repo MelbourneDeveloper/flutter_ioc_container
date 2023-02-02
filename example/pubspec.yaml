@@ -8,12 +8,12 @@ environment:
   sdk: '>=2.18.2 <3.0.0'
 
 dependencies:
+  bloobit: ^1.0.5-beta
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
   flutter_ioc_container:
     path: ../
-  ioc_container: ^1.0.5
 
 
 dev_dependencies:
