@@ -54,7 +54,20 @@ void main() {
     //Should not see spinner
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
+
+  testWidgets('basic scoping', (tester) async {
+    final root = CompositionRoot(
+      container: (IocContainerBuilder()..add((container) => A())).toContainer(),
+      child: const BasicWidgetWithScope(),
+    );
+    await tester.pumpWidget(root);
+    final state = tester
+        .state<_BasicWidgetWithScopeState>(find.byType(BasicWidgetWithScope));
+    expect(identical(state.one, state.two), isTrue);
+  });
 }
+
+class A {}
 
 class BasicWidget extends StatelessWidget {
   const BasicWidget({
@@ -64,6 +77,32 @@ class BasicWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         home: Text(context<String>()),
+      );
+}
+
+class BasicWidgetWithScope extends StatefulWidget {
+  const BasicWidgetWithScope({
+    super.key,
+  });
+
+  @override
+  State<BasicWidgetWithScope> createState() => _BasicWidgetWithScopeState();
+}
+
+class _BasicWidgetWithScopeState extends State<BasicWidgetWithScope> {
+  late final A one, two;
+
+  @override
+  void didChangeDependencies() {
+    final scope = context.scoped();
+    one = scope<A>();
+    two = scope<A>();
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) => const MaterialApp(
+        home: Text('Hi'),
       );
 }
 
