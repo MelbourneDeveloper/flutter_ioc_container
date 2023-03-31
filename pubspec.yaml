@@ -13,7 +13,7 @@ dependencies:
   ioc_container: ^1.0.8
 
 dev_dependencies:
-  austerity: ^0.0.9-beta
+  austerity: ^1.0.0
   example:
     path: example
   flutter_lints: ^2.0.0
