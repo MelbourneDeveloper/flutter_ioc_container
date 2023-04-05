@@ -39,69 +39,137 @@ Or, you can install the package from the command line:
 You can define your dependencies and inject them into your widgets using the `CompositionRoot` widget. You can either pass an `IocContainer` instance into `container` or use the compose property to define your dependencies. The `CompositionRoot` widget houses the IoC container and is placed at the root of the widget tree to propagate it throughout the widgets.
 
 ### Basic Usage
-Let's say you want to inject a string into your widget tree. To do this, you can define a string and pass it to the `CompositionRoot` widget as a parameter. Here's an example:
+- Put a `CompositionRoot` widget at the base of your widget tree 
+- Use the `builder` in the `compose` function to add singleton or transient dependencies to the container. 
+- Access the dependencies throughout the widget tree via the `BuildContext`
 
 ```dart
-const text = 'test';
-final root = CompositionRoot(
-    compose: (builder) => builder.add((container) => text),
-    child: const BasicWidget(),
-);
-```
+import 'package:flutter/material.dart';
+import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 
-### Scoped Injection
-If you need a set of dependencies that have a short life and you want to dispose of them afterwards, you can use the `scoped` method to create a scoped container. Here's an example:
+void main() {
+  runApp(
+    CompositionRoot(
+      compose: (builder) => builder.addSingleton((container) => 'test'),
+      child: MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (context) => const BasicWidget()),
+        ),
+      ),
+    ),
+  );
+}
 
-```dart
-final root = CompositionRoot(
-    container: (IocContainerBuilder()
-        ..add(
-            (container) => A(),
-        )
-        ..add(
-            (container) => B(),
-        )
-        ..add(
-            (container) => C(
-            container<B>(),
-            container<B>(),
-            ),
-        ))
-        .toContainer(),
-    child: const BasicWidgetWithScope(),
-);
-```
+class BasicWidget extends StatelessWidget {
+  const BasicWidget({super.key});
 
-You can load the dependencies in the `State` of your widget
-
-```dart
-@override
-void didChangeDependencies() {
-final scope = context.scoped();
-one = scope<A>();
-two = scope<A>();
-c = context.getScoped<C>();
-super.didChangeDependencies();
+  @override
+  Widget build(BuildContext context) => Text(context<String>());
 }
 ```
 
-### Async Injection
-If you want to inject an object into the widget tree that is loaded asynchronously, you can do so using 'addAsync'. You can use the FutureBuilder widget to render the object when it is available. Here's an example:
+### Scoping
+If you need a set of dependencies that have a short life and you need to dispose of them afterward, something in the widget tree needs to hold onto a scoped container. Get a scoped container by calling `context.scoped()`. One approach is to put the scoped container in the `State` of a `StatefulWidget` and dispose of the contents in the `dispose()` method of the `State`.
+
+This example creates a scoped container on `didChangeDependencies`. It exists for the lifespan of the state and the resources get disposed when the widget tree disposes of this widget.
 
 ```dart
-const text = 'test';
-final root = CompositionRoot(
-    compose: (builder) => builder.addAsync(
-    (container) async =>
-        Future<String>.delayed(const Duration(seconds: 1), () => text),
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_ioc_container/flutter_ioc_container.dart';
+import 'package:ioc_container/ioc_container.dart';
+
+class DisposableResources {
+  String display = 'hello world';
+
+  void dispose() {
+    // ignore: avoid_print
+    print('Disposed');
+  }
+}
+
+void main() {
+  runApp(
+    CompositionRoot(
+      compose: (builder) => builder.addServiceDefinition<DisposableResources>(
+        ServiceDefinition(
+          (container) => DisposableResources(),
+          dispose: (service) => service.dispose(),
+        ),
+      ),
+      child: MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (context) => const BasicWidget()),
+        ),
+      ),
     ),
-    child: const BasicAsyncWidget(),
-);
+  );
+}
+
+class BasicWidget extends StatefulWidget {
+  const BasicWidget({super.key});
+
+  @override
+  State<BasicWidget> createState() => _BasicWidgetState();
+}
+
+class _BasicWidgetState extends State<BasicWidget> {
+  late final IocContainer scopedContainer;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    scopedContainer = context.scoped();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    unawaited(scopedContainer.dispose());
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(scopedContainer<DisposableResources>().display);
+}
 ```
 
-You can access the future with `FutureBuilder` like this.
+See more on scoping [here](https://pub.dev/packages/ioc_container#scoping-and-disposal). 
+
+### Async Injection
+If your dependency requires async initialization, you can do this using 'addAsync'. You can use the [`FutureBuilder`](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html) widget to render the object when it is available. Here's an example:
 
 ```dart
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_ioc_container/flutter_ioc_container.dart';
+
+void main() {
+  runApp(
+    CompositionRoot(
+      compose: (builder) => builder.addSingletonAsync(
+        (container) async => Future<String>.delayed(
+          const Duration(seconds: 5),
+          () => 'Hello world!',
+        ),
+      ),
+      child: MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (context) => const BasicAsyncWidget()),
+        ),
+      ),
+    ),
+  );
+}
+
+class BasicAsyncWidget extends StatefulWidget {
+  const BasicAsyncWidget({super.key});
+
+  @override
+  State<BasicAsyncWidget> createState() => _BasicAsyncWidgetState();
+}
+
 class _BasicAsyncWidgetState extends State<BasicAsyncWidget> {
   late final Future<String> future;
 
@@ -113,16 +181,15 @@ class _BasicAsyncWidgetState extends State<BasicAsyncWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        home: FutureBuilder(
-          // ignore: discarded_futures
-          future: future,
-          builder: (ctx, ss) => ss.connectionState == ConnectionState.done
-              ? Text(ss.data!)
-              : const CircularProgressIndicator(),
-        ),
+  Widget build(BuildContext context) => FutureBuilder(
+        // ignore: discarded_futures
+        future: future,
+        builder: (ctx, ss) => ss.connectionState == ConnectionState.done
+            ? Text(ss.data!)
+            : const CircularProgressIndicator(),
       );
 }
 ```
 
+See more on async injection [here](https://pub.dev/packages/ioc_container#async-initialization).
 
