@@ -8,3 +8,5 @@ Tests and doco
 Doco
 ## 0.4.0
 Doco
+## 1.0.12
+Doco and bring version into line with `ioc_container`

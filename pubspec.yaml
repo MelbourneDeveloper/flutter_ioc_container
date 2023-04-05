@@ -1,6 +1,6 @@
 name: flutter_ioc_container
-description: A Flutter extension for the ioc_container package
-version: 0.4.0
+description: A lightweight, flexible, and high-performance dependency injection and service location library for Flutter
+version: 1.0.12
 repository: https://github.com/MelbourneDeveloper/flutter_ioc_container
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ioc_container: ^1.0.8
+  ioc_container: ^1.0.12
 
 dev_dependencies:
   austerity: ^1.0.0
