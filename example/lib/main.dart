@@ -1,96 +1,68 @@
-import 'package:bloobit/bloobit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 import 'package:ioc_container/ioc_container.dart';
 
-class AppState {
-  AppState(this.counter);
+class CounterController extends ValueNotifier<int> {
+  CounterController() : super(0);
 
-  final int counter;
-
-  AppState copyWith({int? counter}) => AppState(counter ?? this.counter);
+  void increment() => value++;
 }
-
-class AppBloobit extends Bloobit<AppState> {
-  AppBloobit(super.initialState);
-
-  void increment() => setState(state.copyWith(counter: state.counter + 1));
-}
-
-IocContainerBuilder compose() => IocContainerBuilder()
-  ..addSingleton(
-    (container) => AppBloobit(AppState(0)),
-  )
-  ..add(
-    (container) => CounterText(
-      counter: container<AppBloobit>().state.counter,
-    ),
-  );
 
 void main() {
   runApp(
-    const AppRoot(),
+    const MyApp(),
   );
 }
 
-class AppRoot extends StatelessWidget {
-  const AppRoot({
+class MyApp extends StatelessWidget {
+  const MyApp({
     super.key,
     this.configureOverrides,
   });
 
+  //This allows us to override the dependencies for testing. Take a look at
+  //the widget tests
   final void Function(IocContainerBuilder builder)? configureOverrides;
 
   @override
   Widget build(BuildContext context) => CompositionRoot(
         configureOverrides: configureOverrides,
-        container: compose().toContainer(),
-        child: const CounterApp(),
-      );
-}
-
-class CounterApp extends StatelessWidget {
-  const CounterApp({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) => BloobitWidget(
-        bloobit: context<AppBloobit>(),
-        builder: (context, bloobit) => MaterialApp(
-          title: 'sample',
-          home: Scaffold(
-            appBar: AppBar(
-              title: const Text('sample'),
-            ),
-            body: Align(
-              child: SizedBox(
-                height: 60,
-                width: 300,
-                child: ElevatedButton(
-                  onPressed: bloobit.increment,
-                  child: context<CounterText>(),
+        compose: (builder) => builder
+          //Adds a singleton CounterController to the container
+          ..addSingleton(
+            (container) => CounterController(),
+          ),
+        child:
+            //We need the BuildContext from the Builder here so the children
+            //can access the container in the CompositionRoot
+            Builder(
+          builder: (context) => AnimatedBuilder(
+            //Access the ValueNotifier. It's a singleton so we can access it
+            //from anywhere in the widget tree safely
+            animation: context<CounterController>(),
+            builder: (context, child) => MaterialApp(
+              theme: ThemeData(useMaterial3: true),
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(
+                body: Align(
+                  child: SizedBox(
+                    height: 60,
+                    width: 300,
+                    child: FloatingActionButton.extended(
+                      icon: const Icon(Icons.add),
+                      //Increment the value
+                      onPressed: context<CounterController>().increment,
+                      label: Text(
+                        //Display the value
+                        context<CounterController>().value.toString(),
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      );
-}
-
-class CounterText extends StatelessWidget {
-  const CounterText({
-    required this.counter,
-    super.key,
-  });
-
-  final int counter;
-
-  @override
-  Widget build(BuildContext context) => Text(
-        '$counter',
-        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-              color: Colors.white,
-            ),
       );
 }

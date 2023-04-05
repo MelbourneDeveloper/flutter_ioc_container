@@ -17,14 +17,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.10-beta"
-  bloobit:
-    dependency: "direct main"
-    description:
-      name: bloobit
-      sha256: "82ff9eca1478668e94d587b3671bdc3db6cb6bbec208cd347372f99c3fa88f8e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.5-beta"
   boolean_selector:
     dependency: transitive
     description:
