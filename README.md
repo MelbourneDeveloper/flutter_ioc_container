@@ -37,11 +37,8 @@ Or, you can install the package from the command line:
 
 `flutter pub add flutter_ioc_container`
 
-### Defining and Injecting Dependencies
-You can define your dependencies and inject them into your widgets using the `CompositionRoot` widget. You can either pass an `IocContainer` instance into `container` or use the compose property to define your dependencies. The `CompositionRoot` widget houses the IoC container and is placed at the root of the widget tree to propagate it throughout the widgets.
-
 ### Basic Usage
-- Put a `CompositionRoot` widget at the base of your widget tree 
+- Put a `CompositionRoot` widget at the base of your widget tree. This propagates the container throughout the widget tree as an inherited widget.
 - Use the `builder` in the `compose` function to add singleton or transient dependencies to the container. 
 - Access the dependencies throughout the widget tree via the `BuildContext`
 
