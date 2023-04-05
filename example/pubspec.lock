@@ -13,10 +13,10 @@ packages:
     dependency: "direct dev"
     description:
       name: austerity
-      sha256: "801f78c176fc2a7762d2d6ff21ef38c2cda2a2296d572f7a393263c6d3b57c2d"
+      sha256: "752608b94a84d1765e8eafa877463b6823da08c3e65477b965429fee2aca79d1"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.10-beta"
+    version: "1.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -94,10 +94,10 @@ packages:
     dependency: transitive
     description:
       name: ioc_container
-      sha256: ce1b32d560fbfd09c9daaa45a22701e5332a0e53b80abcd8fd0eaa9933ba1ae0
+      sha256: "25f30ade53718a8bf9b2656a23a2ee1661b23724e14503aac90fc96afe2d9947"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.8"
+    version: "1.0.12"
   js:
     dependency: transitive
     description:

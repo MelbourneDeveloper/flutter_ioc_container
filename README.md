@@ -1,6 +1,10 @@
 # flutter_ioc_container
 
-Flutter extensions that allow you to use the [ioc_container](https://pub.dev/packages/ioc_container) throughout the widget tree. The library provides extension methods on `BuildContext` to allow getting instances of objects from the container, such as `get<T>()`, `getAsync<T>()`, and `scoped<T>()`.
+Manage your dependencies in the widget tree, access them from the `BuildContext` and replace them with test doubles for testing.
+
+[ioc_container](https://pub.dev/packages/ioc_container) is a dependency injection and service location library for Dart. You can use it in Flutter as a service locator like the `GetIt` package. `flutter_ioc_container` is an extension that exposes the library throughout the widget tree so you can use it like `Provider`.
+
+The library provides extension methods on `BuildContext` to allow getting instances of objects from the container, such as `get<T>()`, `getAsync<T>()`, and `scoped<T>()`.
 
 ## Getting Started
 
