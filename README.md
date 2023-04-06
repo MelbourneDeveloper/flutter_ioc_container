@@ -192,3 +192,62 @@ class _BasicAsyncWidgetState extends State<BasicAsyncWidget> {
 
 See more on async injection [here](https://pub.dev/packages/ioc_container#async-initialization).
 
+## Replace Dependencies with Test Doubles for Testing
+
+Pass a configure `configureOverrides` function into your root widget. This allows you to replace dependencies with test doubles for testing. See the example widget [tests](example/test/widget_test.dart) for a full example.
+
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({
+    super.key,
+    this.configureOverrides,
+  });
+
+  //This allows us to override the dependencies for testing. Take a look at
+  //the widget tests
+  final void Function(IocContainerBuilder builder)? configureOverrides;
+
+  @override
+  Widget build(BuildContext context) => CompositionRoot(
+        configureOverrides: configureOverrides,
+        compose: (builder) => builder
+          //Adds a singleton CounterController to the container
+          ..addSingleton(
+            (container) => CounterController(),
+          ),
+        // [...] See the example folder of this package for a full example
+      );
+}
+```
+
+This example overrides the dependency with a `MockValueNotifier`
+
+```dart
+testWidgets('Basic Smoke Test', (tester) async {
+    final mockValueNotifier = MockValueNotifier();
+
+    await tester.pumpWidget(
+      MyApp(
+        //This is how you substitute dependencies with test doubles
+        configureOverrides: (builder) => builder
+            .addSingleton<CounterController>((container) => mockValueNotifier),
+      ),
+    );
+
+    //Initial value
+    expect(find.text('0'), findsOneWidget);
+
+    //Tap the button
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    //Verify value
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('0'), findsNothing);
+
+    //Ensure we're using the mock dependency
+    expect(mockValueNotifier.hasCalls, isTrue);
+  });
+```
+
+See more on testing [here](https://pub.dev/packages/ioc_container#testing).
