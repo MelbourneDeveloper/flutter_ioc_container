@@ -29,33 +29,35 @@ class MyApp extends StatelessWidget {
         configureOverrides: configureOverrides,
         compose: (builder) => builder
           //Adds a singleton CounterController to the container
-          ..addSingleton(
+          ..add(
             (container) => CounterController(),
           ),
         child:
             //We need the BuildContext from the Builder here so the children
             //can access the container in the CompositionRoot
-            Builder(
-          builder: (context) => AnimatedBuilder(
-            //Access the ValueNotifier. It's a singleton so we can access it
-            //from anywhere in the widget tree safely
-            animation: context<CounterController>(),
-            builder: (context, child) => MaterialApp(
-              theme: ThemeData(useMaterial3: true),
-              debugShowCheckedModeBanner: false,
-              home: Scaffold(
-                body: Align(
-                  child: SizedBox(
-                    height: 60,
-                    width: 300,
-                    child: FloatingActionButton.extended(
-                      icon: const Icon(Icons.add),
-                      //Increment the value
-                      onPressed: context<CounterController>().increment,
-                      label: Text(
-                        //Display the value
-                        context<CounterController>().value.toString(),
-                        style: Theme.of(context).textTheme.headlineMedium,
+            ContainerScope(
+          child: Builder(
+            builder: (context) => AnimatedBuilder(
+              //Access the ValueNotifier. It's a singleton so we can access it
+              //from anywhere in the widget tree safely
+              animation: context<CounterController>(),
+              builder: (context, child) => MaterialApp(
+                theme: ThemeData(useMaterial3: true),
+                debugShowCheckedModeBanner: false,
+                home: Scaffold(
+                  body: Align(
+                    child: SizedBox(
+                      height: 60,
+                      width: 300,
+                      child: FloatingActionButton.extended(
+                        icon: const Icon(Icons.add),
+                        //Increment the value
+                        onPressed: context<CounterController>().increment,
+                        label: Text(
+                          //Display the value
+                          context<CounterController>().value.toString(),
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
                       ),
                     ),
                   ),

@@ -120,3 +120,30 @@ extension IocContainerBuildContextExtensions on BuildContext {
         useExistingSingletons: useExistingSingletons,
       );
 }
+
+class ContainerScope extends StatefulWidget {
+  const ContainerScope({
+    required this.child,
+    super.key,
+  });
+  final Widget child;
+
+  @override
+  ContainerScopeState createState() => ContainerScopeState();
+}
+
+class ContainerScopeState extends State<ContainerScope> {
+  IocContainer? scope;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    scope ??= context.scoped();
+  }
+
+  @override
+  Widget build(BuildContext context) => CompositionRoot(
+        container: scope,
+        child: widget.child,
+      );
+}
