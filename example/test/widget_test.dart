@@ -22,7 +22,7 @@ void main() {
       MyApp(
         //This is how you substitute dependencies with test doubles
         configureOverrides: (builder) => builder
-            .addSingleton<CounterController>((container) => mockValueNotifier),
+            .add<CounterController>((container) => mockValueNotifier),
       ),
     );
 
