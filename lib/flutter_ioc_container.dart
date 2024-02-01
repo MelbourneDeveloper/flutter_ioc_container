@@ -1,5 +1,3 @@
-library flutter_ioc_container;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ioc_container/ioc_container.dart';
@@ -47,17 +45,13 @@ class CompositionRoot extends InheritedWidget {
   ) =>
       _guard(context).container.get<T>();
 
-  ///Gets a service that requires async initialization. Add these services with [IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync] You can only use this on factories that return a Future<>. Warning: if the definition is singleton/scoped and the Future fails, the factory will never return a valid value, so use [getAsyncSafe] to ensure the container doesn't store failed singletons
+  ///Gets a service that requires async initialization. Add these services with 
+  ///[IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync].
+  ///This uses the async locking feature.
   static Future<T> getAsync<T extends Object>(
     BuildContext context,
   ) =>
       _guard(context).container.getAsync<T>();
-
-  ///See [getAsync]. Safely makes an async call by creating a temporary scoped container, attempting to make the async initialization and merging the result with the current container if there is success. You don't need call this inside a factory (in your composition). Only call this from the outside, and handle the errors/timeouts gracefully. Warning: this does not do error handling and this also allows reentrancy. If you call this more than once in parallel it will create multiple Futures - i.e. make multiple async calls. You need to guard against this and perform retries on failure.
-  static Future<T> getAsyncSafe<T extends Object>(
-    BuildContext context,
-  ) =>
-      _guard(context).container.getAsyncSafe<T>();
 
   ///Gets a service, but each service in the object mesh will have only one
   ///instance. If you want to get multiple scoped objects, call [scoped] to
@@ -101,12 +95,10 @@ extension IocContainerBuildContextExtensions on BuildContext {
   ///Shortcut for [get]
   T call<T extends Object>() => CompositionRoot.get<T>(this);
 
-  ///Gets a service that requires async initialization. Add these services with [IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync] You can only use this on factories that return a Future<>. Warning: if the definition is singleton/scoped and the Future fails, the factory will never return a valid value, so use [getAsyncSafe] to ensure the container doesn't store failed singletons
+  ///Gets a service that requires async initialization. Add these services with 
+  ///[IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync] 
+  ///You can only use this on factories that return a Future<>.
   Future<T> getAsync<T extends Object>() => CompositionRoot.getAsync<T>(this);
-
-  ///See [getAsync]. Safely makes an async call by creating a temporary scoped container, attempting to make the async initialization and merging the result with the current container if there is success. You don't need call this inside a factory (in your composition). Only call this from the outside, and handle the errors/timeouts gracefully. Warning: this does not do error handling and this also allows reentrancy. If you call this more than once in parallel it will create multiple Futures - i.e. make multiple async calls. You need to guard against this and perform retries on failure.
-  Future<T> getAsyncSafe<T extends Object>() =>
-      CompositionRoot.getAsyncSafe<T>(this);
 
   ///Gets a service, but each service in the object mesh will have only one
   ///instance. If you want to get multiple scoped objects, call [scoped] to
