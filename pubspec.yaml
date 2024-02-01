@@ -4,7 +4,7 @@ version: 2.0.1-beta
 repository: https://github.com/MelbourneDeveloper/flutter_ioc_container
 
 environment:
-  sdk: '>=2.18.2 <3.0.0'
+  sdk: '>=2.18.2 <4.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
