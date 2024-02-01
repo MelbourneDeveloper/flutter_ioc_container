@@ -2,7 +2,7 @@ library flutter_ioc_container;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:ioc_container/ioc_container.dart';
+import 'package:flutter_ioc_container/ioc_container.dart';
 
 ///This widget houses the IoC container and we propagate this to all widgets in
 ///the tree. Put one at the root of your app
@@ -46,6 +46,35 @@ class CompositionRoot extends InheritedWidget {
     BuildContext context,
   ) =>
       _guard(context).container.get<T>();
+
+  ///Get an instance of the service by type
+  static T fallback<T extends Object>(
+    BuildContext context,
+  ) {
+    BuildContext? currentContext = context;
+
+    while (currentContext != null) {
+      final compositionRoot =
+          currentContext.dependOnInheritedWidgetOfExactType<CompositionRoot>();
+
+      if (compositionRoot?.container.hasInstance<T>() ?? false) {
+        return compositionRoot!.container.get<T>();
+      }
+
+      if (compositionRoot == null) {
+        break;
+      }
+
+      currentContext = currentContext
+          .getElementForInheritedWidgetOfExactType<CompositionRoot>();
+
+      if (currentContext == null) {
+        break;
+      }
+    }
+
+    return context.get<T>();
+  }
 
   ///Gets a service that requires async initialization. Add these services with [IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync] You can only use this on factories that return a Future<>. Warning: if the definition is singleton/scoped and the Future fails, the factory will never return a valid value, so use [getAsyncSafe] to ensure the container doesn't store failed singletons
   static Future<T> getAsync<T extends Object>(
@@ -129,10 +158,10 @@ class ContainerScope extends StatefulWidget {
   final Widget child;
 
   @override
-  ContainerScopeState createState() => ContainerScopeState();
+  State<ContainerScope> createState() => _ContainerScopeState();
 }
 
-class ContainerScopeState extends State<ContainerScope> {
+class _ContainerScopeState extends State<ContainerScope> {
   IocContainer? scope;
 
   @override

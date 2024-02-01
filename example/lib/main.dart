@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
-import 'package:ioc_container/ioc_container.dart';
+import 'package:flutter_ioc_container/ioc_container.dart';
 
 class CounterController extends ValueNotifier<int> {
   CounterController() : super(0);

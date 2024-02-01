@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_ioc_container/flutter_ioc_container.dart';
+import 'package:flutter_ioc_container/ioc_container.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ioc_container/ioc_container.dart';
 
 void main() {
   ///This test shows how to use the CompositionRoot widget to provide

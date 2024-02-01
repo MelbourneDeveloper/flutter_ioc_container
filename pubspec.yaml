@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ioc_container: ^1.0.12
 
 dev_dependencies:
   austerity: ^1.0.0

@@ -3,3 +3,4 @@ include: package:austerity/analysis_options.yaml
 analyzer:
   errors:
     use_super_parameters: error
+    body_might_complete_normally_nullable: error
