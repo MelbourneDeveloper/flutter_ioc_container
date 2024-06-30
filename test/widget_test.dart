@@ -142,25 +142,32 @@ void main() {
     );
     expect(identical(state.one, state.two), isTrue);
     expect(identical(state.c.b1, state.c.b2), isTrue);
+  });
 
-    await tester.pumpWidget(
-      CompositionRoot(
-        compose: ContainerCompose(
-          (IocContainerBuilder()
-                ..addSingleton((_) => A())
-                ..addSingleton((_) => B())
-                ..add((container) => C(container<B>(), container<B>())))
-              .toContainer(),
-        ),
-        child: const BasicWidgetWithScopeNoExisting(),
+  testWidgets('scoped container with useExistingSingletons: false',
+      (tester) async {
+    final container = (IocContainerBuilder()
+          ..addSingleton((_) => A())
+          ..addSingleton((_) => B()))
+        .toContainer();
+
+    final root = CompositionRoot(
+      compose: ContainerCompose(container),
+      child: Builder(
+        builder: (context) {
+          final scopedContainer = context.scoped(useExistingSingletons: false);
+          final a1 = container<A>();
+          final a2 = scopedContainer<A>();
+          final b1 = container<B>();
+          final b2 = scopedContainer<B>();
+          expect(identical(a1, a2), isFalse);
+          expect(identical(b1, b2), isFalse);
+          return const SizedBox.shrink();
+        },
       ),
     );
 
-    final stateNoExisting = tester.state<_BasicWidgetWithScopeNoExistingState>(
-      find.byType(BasicWidgetWithScopeNoExisting),
-    );
-    expect(identical(stateNoExisting.one, stateNoExisting.two), isTrue);
-    expect(identical(stateNoExisting.c.b1, stateNoExisting.c.b2), isFalse);
+    await tester.pumpWidget(root);
   });
 }
 
@@ -198,33 +205,6 @@ class _BasicWidgetWithScopeState extends State<BasicWidgetWithScope> {
   @override
   void didChangeDependencies() {
     final scope = context.scoped();
-    one = scope<A>();
-    two = scope<A>();
-    c = context.getScoped<C>();
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) => const MaterialApp(home: Text('Hi'));
-}
-
-class BasicWidgetWithScopeNoExisting extends StatefulWidget {
-  const BasicWidgetWithScopeNoExisting({super.key});
-
-  @override
-  State<BasicWidgetWithScopeNoExisting> createState() =>
-      _BasicWidgetWithScopeNoExistingState();
-}
-
-class _BasicWidgetWithScopeNoExistingState
-    extends State<BasicWidgetWithScopeNoExisting> {
-  late final A one;
-  late final A two;
-  late final C c;
-
-  @override
-  void didChangeDependencies() {
-    final scope = context.scoped(useExistingSingletons: false);
     one = scope<A>();
     two = scope<A>();
     c = context.getScoped<C>();
