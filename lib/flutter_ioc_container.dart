@@ -50,7 +50,8 @@ class CompositionRoot extends InheritedWidget {
           final ContainerCompose cc => cc.container,
           // Builds the container from a builder
           final BuildCompose bc =>
-            _getBuilder(bc, configureOverrides != null).toContainer(),
+            _getBuilder(bc, configureOverrides != null, configureOverrides)
+                .toContainer(),
           // Builds the container from a builder, but BYO
           final BuilderCompose bc => bc.builder.toContainer(),
         };
@@ -59,10 +60,12 @@ class CompositionRoot extends InheritedWidget {
   static IocContainerBuilder _getBuilder(
     BuildCompose composeBuilder,
     bool allowOverrides,
+    void Function(IocContainerBuilder builder)? configureOverrides,
   ) {
     final iocContainerBuilder =
         IocContainerBuilder(allowOverrides: allowOverrides);
     composeBuilder.configureBuild(iocContainerBuilder);
+    configureOverrides?.call(iocContainerBuilder);
     return iocContainerBuilder;
   }
 
