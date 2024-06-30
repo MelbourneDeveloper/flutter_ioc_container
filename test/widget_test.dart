@@ -36,15 +36,14 @@ void main() {
   ///The dependency in this case is a future that returns a text string.
   testWidgets('basic async', (tester) async {
     const text = 'test';
-    final root = CompositionRoot(
-      compose: BuildCompose(
-        (builder) => builder.addAsync(
-          (container) async =>
-              Future<String>.delayed(const Duration(seconds: 1), () => text),
-        ),
+    final root = CompositionRoot.configureBuild(
+      const BasicAsyncWidget(),
+      (builder) => builder.addAsync(
+        (container) async =>
+            Future<String>.delayed(const Duration(seconds: 1), () => text),
       ),
-      child: const BasicAsyncWidget(),
     );
+
     await tester.pumpWidget(root);
 
     //No text yet

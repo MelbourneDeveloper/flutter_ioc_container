@@ -2,6 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ioc_container/ioc_container.dart';
 
+/// Given a [IocContainerBuilder], this function is used to configure the
+/// container. 
+typedef ConfigureBuild = void Function(IocContainerBuilder builder);
+
 ///A Compose object is used to determine how the IoC container is created.
 ///The two choices are [ContainerCompose] and [BuildCompose].
 sealed class Compose {}
@@ -23,7 +27,7 @@ final class BuildCompose extends Compose {
 
   /// Exposes the builder so you can configure it at the point of constructing
   /// the [CompositionRoot]
-  final void Function(IocContainerBuilder builder) configureBuild;
+  final ConfigureBuild configureBuild;
 }
 
 /// Use this to build the container from a builder at the point of
@@ -56,11 +60,22 @@ class CompositionRoot extends InheritedWidget {
           final BuilderCompose bc => bc.builder.toContainer(),
         };
 
+  /// The most straightforward way to create a [CompositionRoot] with
+  /// a simple composition
+  factory CompositionRoot.configureBuild(
+    Widget child,
+    ConfigureBuild configureBuild,
+  ) =>
+      CompositionRoot(
+        compose: BuildCompose(configureBuild),
+        child: child,
+      );
+
   /// Runs the configuration on the builder
   static IocContainerBuilder _getBuilder(
     BuildCompose composeBuilder,
     bool allowOverrides,
-    void Function(IocContainerBuilder builder)? configureOverrides,
+    ConfigureBuild? configureOverrides,
   ) {
     final iocContainerBuilder =
         IocContainerBuilder(allowOverrides: allowOverrides);
@@ -70,7 +85,7 @@ class CompositionRoot extends InheritedWidget {
   }
 
   ///Allows overrides for testing
-  final void Function(IocContainerBuilder builder)?
+  final ConfigureBuild?
       // ignore: diagnostic_describe_all_properties
       configureOverrides;
 
