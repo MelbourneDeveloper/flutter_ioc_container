@@ -10,7 +10,7 @@ void main() {
   testWidgets('basic compose', (tester) async {
     const text = 'test';
     final root = CompositionRoot(
-      compose: (builder) => builder.add((container) => text),
+      compose: BuildCompose((builder) => builder.add((container) => text)),
       child: const BasicWidget(),
     );
     await tester.pumpWidget(root);
@@ -23,8 +23,9 @@ void main() {
   testWidgets('basic container', (tester) async {
     const text = 'test';
     final root = CompositionRoot(
-      container:
-          (IocContainerBuilder()..add((container) => text)).toContainer(),
+      compose: ContainerCompose(
+        (IocContainerBuilder()..add((container) => text)).toContainer(),
+      ),
       child: const BasicWidget(),
     );
     await tester.pumpWidget(root);
@@ -36,9 +37,11 @@ void main() {
   testWidgets('basic async', (tester) async {
     const text = 'test';
     final root = CompositionRoot(
-      compose: (builder) => builder.addAsync(
-        (container) async =>
-            Future<String>.delayed(const Duration(seconds: 1), () => text),
+      compose: BuildCompose(
+        (builder) => builder.addAsync(
+          (container) async =>
+              Future<String>.delayed(const Duration(seconds: 1), () => text),
+        ),
       ),
       child: const BasicAsyncWidget(),
     );
@@ -69,20 +72,22 @@ void main() {
   ///Each type only ever has one instance in a scope
   testWidgets('basic scoping', (tester) async {
     final root = CompositionRoot(
-      container: (IocContainerBuilder()
-            ..add(
-              (container) => A(),
-            )
-            ..add(
-              (container) => B(),
-            )
-            ..add(
-              (container) => C(
-                container<B>(),
-                container<B>(),
-              ),
-            ))
-          .toContainer(),
+      compose: ContainerCompose(
+        (IocContainerBuilder()
+              ..add(
+                (container) => A(),
+              )
+              ..add(
+                (container) => B(),
+              )
+              ..add(
+                (container) => C(
+                  container<B>(),
+                  container<B>(),
+                ),
+              ))
+            .toContainer(),
+      ),
       child: const BasicWidgetWithScope(),
     );
     await tester.pumpWidget(root);

@@ -2,31 +2,68 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ioc_container/ioc_container.dart';
 
+///A Compose object is used to determine how the IoC container is created.
+///The two choices are [ContainerCompose] and [BuildCompose].
+sealed class Compose {}
+
+/// Use this to pass an existing container to the CompositionRoot
+final class ContainerCompose extends Compose {
+  /// Creates a [ContainerCompose]
+  ContainerCompose(this.container);
+
+  /// The container to use
+  final IocContainer container;
+}
+
+/// Use this to build the container from a builder at the point of
+/// constructing the [CompositionRoot]. Most apps will use this case
+final class BuildCompose extends Compose {
+  /// Creates a [BuildCompose]
+  BuildCompose(this.configureBuild);
+
+  /// Exposes the builder so you can configure it at the point of constructing
+  /// the [CompositionRoot]
+  final void Function(IocContainerBuilder builder) configureBuild;
+}
+
+/// Use this to build the container from a builder at the point of
+/// constructing the [CompositionRoot].
+final class BuilderCompose extends Compose {
+  /// Creates a [BuilderCompose]
+  BuilderCompose(this.builder);
+
+  /// The builder to build the container with
+  final IocContainerBuilder builder;
+}
+
 ///This widget houses the IoC container and we propagate this to all widgets in
 ///the tree. Put one at the root of your app
 class CompositionRoot extends InheritedWidget {
   ///Creates a [CompositionRoot]
   CompositionRoot({
     required super.child,
-    IocContainer? container,
-    void Function(IocContainerBuilder builder)? compose,
+    required Compose compose,
     this.configureOverrides,
     super.key,
-  }) : assert(
-          compose != null || container != null,
-          'You must specify a container or a compose method.',
-        ) {
-    if (container == null) {
-      final iocContainerBuilder =
-          IocContainerBuilder(allowOverrides: configureOverrides != null);
-      compose!(
-        iocContainerBuilder,
-      );
-      configureOverrides?.call(iocContainerBuilder);
-      this.container = iocContainerBuilder.toContainer();
-    } else {
-      this.container = container;
-    }
+  }) : container = switch (compose) {
+          // Accepts an existing container
+          final ContainerCompose cc => cc.container,
+          // Builds the container from a builder
+          final BuildCompose bc =>
+            _getBuilder(bc, configureOverrides != null).toContainer(),
+          // Builds the container from a builder, but BYO
+          final BuilderCompose bc => bc.builder.toContainer(),
+        };
+
+  /// Runs the configuration on the builder
+  static IocContainerBuilder _getBuilder(
+    BuildCompose composeBuilder,
+    bool allowOverrides,
+  ) {
+    final iocContainerBuilder =
+        IocContainerBuilder(allowOverrides: allowOverrides);
+    composeBuilder.configureBuild(iocContainerBuilder);
+    return iocContainerBuilder;
   }
 
   ///Allows overrides for testing
@@ -37,7 +74,7 @@ class CompositionRoot extends InheritedWidget {
   ///The IoC container. This is the container that will be used by all widgets.
   ///Use [IocContainerBuilder] to compose your dependencies and then call
   ///[IocContainerBuilder.toContainer] to get the container
-  late final IocContainer container;
+  final IocContainer container;
 
   ///Get an instance of the service by type
   static T get<T extends Object>(
@@ -45,7 +82,7 @@ class CompositionRoot extends InheritedWidget {
   ) =>
       _guard(context).container.get<T>();
 
-  ///Gets a service that requires async initialization. Add these services with 
+  ///Gets a service that requires async initialization. Add these services with
   ///[IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync].
   ///This uses the async locking feature.
   static Future<T> getAsync<T extends Object>(
@@ -95,8 +132,8 @@ extension IocContainerBuildContextExtensions on BuildContext {
   ///Shortcut for [get]
   T call<T extends Object>() => CompositionRoot.get<T>(this);
 
-  ///Gets a service that requires async initialization. Add these services with 
-  ///[IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync] 
+  ///Gets a service that requires async initialization. Add these services with
+  ///[IocContainerBuilder.addAsync] or [IocContainerBuilder.addSingletonAsync]
   ///You can only use this on factories that return a Future<>.
   Future<T> getAsync<T extends Object>() => CompositionRoot.getAsync<T>(this);
 
