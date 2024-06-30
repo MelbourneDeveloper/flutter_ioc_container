@@ -7,7 +7,8 @@ import 'package:ioc_container/ioc_container.dart';
 typedef ConfigureBuild = void Function(IocContainerBuilder builder);
 
 ///A Compose object is used to determine how the IoC container is created.
-///The two choices are [ContainerCompose] and [BuildCompose].
+///The three choices are [ContainerCompose], [BuilderCompose] and 
+///[BuildCompose].
 sealed class Compose {}
 
 /// Use this to pass an existing container to the CompositionRoot
@@ -20,7 +21,7 @@ final class ContainerCompose extends Compose {
 }
 
 /// Use this to build the container from a builder at the point of
-/// constructing the [CompositionRoot]. Most apps will use this case
+/// constructing the [CompositionRoot]. Most apps will use this case.
 final class BuildCompose extends Compose {
   /// Creates a [BuildCompose]
   BuildCompose(this.configureBuild, {this.configureOverrides});
