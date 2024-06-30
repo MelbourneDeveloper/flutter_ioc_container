@@ -1,20 +1,21 @@
+
 # flutter_ioc_container
 
 ![ioc_container](https://github.com/MelbourneDeveloper/ioc_container/raw/main/images/ioc_container-256x256.png)
 
-Manage your dependencies in the widget tree, access them from the `BuildContext` and replace them with test doubles for testing.
+Manage your dependencies in the widget tree, access them from the `BuildContext`, and replace them with test doubles for testing.
 
-[ioc_container](https://pub.dev/packages/ioc_container) is a dependency injection and service location library for Dart. You can use it in Flutter as a service locator like the `GetIt` package. `flutter_ioc_container` is an extension for `ioc_container` that exposes the library throughout the widget tree so you can use it like `Provider`. It provides extension methods on `BuildContext` to allow you to get instances of your dependencies and anywhere in the widget tree. 
+[ioc_container](https://pub.dev/packages/ioc_container) is a dependency injection and service location library for Dart. You can use it in Flutter as a service locator like the `GetIt` package. `flutter_ioc_container` is an extension for `ioc_container` that exposes the library throughout the widget tree so you can use it like `Provider`. It provides extension methods on `BuildContext` to allow you to get instances of your dependencies anywhere in the widget tree.
 
-This accesses the `CounterController` to increment and grab the current value
+This accesses the `CounterController` to increment and grab the current value:
 
 ```dart
 FloatingActionButton.extended(
     icon: const Icon(Icons.add),
-    //Increment the value
+    // Increment the value
     onPressed: context<CounterController>().increment,
     label: Text(
-    //Display the value
+    // Display the value
     context<CounterController>().value.toString(),
     style: Theme.of(context).textTheme.headlineMedium,
     ),
@@ -29,18 +30,24 @@ _See the [ioc_container](https://pub.dev/packages/ioc_container) documentation f
 
 Add the following line to your `pubspec.yaml` file under the dependencies section:
 
-`flutter_ioc_container: <latest version>`
+```yaml
+dependencies:
+  flutter_ioc_container: <latest version>
+```
 
 Run `flutter pub get` to download the dependencies.
 
 Or, you can install the package from the command line:
 
-`flutter pub add flutter_ioc_container`
+```sh
+flutter pub add flutter_ioc_container
+```
 
 ### Basic Usage
+
 - Put a `CompositionRoot` widget at the base of your widget tree. This propagates the container throughout the widget tree as an inherited widget.
-- Use the `builder` in the `compose` function to add singleton or transient dependencies to the container. 
-- Access the dependencies throughout the widget tree via the `BuildContext`
+- Specify the `configureBuild` parameter to configure the container.
+- Access the dependencies throughout the widget tree via the `BuildContext`.
 
 ```dart
 import 'package:flutter/material.dart';
@@ -48,13 +55,13 @@ import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 
 void main() {
   runApp(
-    CompositionRoot(
-      compose: (builder) => builder.addSingleton((container) => 'test'),
-      child: MaterialApp(
+    CompositionRoot.configureBuild(
+      MaterialApp(
         home: Scaffold(
           body: Builder(builder: (context) => const BasicWidget()),
         ),
       ),
+      (builder) => builder.addSingleton((container) => 'test'),
     ),
   );
 }
@@ -68,9 +75,10 @@ class BasicWidget extends StatelessWidget {
 ```
 
 ### Scoping
+
 If you need a set of dependencies that have a short life and you need to dispose of them afterward, something in the widget tree needs to hold onto a scoped container. Get a scoped container by calling `context.scoped()`. One approach is to put the scoped container in the `State` of a `StatefulWidget` and dispose of the contents in the `dispose()` method of the `State`.
 
-This example creates a scoped container on `didChangeDependencies`. It exists for the lifespan of the state and the resources get disposed when the widget tree disposes of this widget.
+This example creates a scoped container on `didChangeDependencies`. It exists for the lifespan of the state, and the resources get disposed when the widget tree disposes of this widget.
 
 ```dart
 import 'dart:async';
@@ -90,17 +98,15 @@ class DisposableResources {
 
 void main() {
   runApp(
-    CompositionRoot(
-      compose: (builder) => builder.addServiceDefinition<DisposableResources>(
-        ServiceDefinition(
-          (container) => DisposableResources(),
-          dispose: (service) => service.dispose(),
-        ),
-      ),
-      child: MaterialApp(
+    CompositionRoot.configureBuild(
+      MaterialApp(
         home: Scaffold(
           body: Builder(builder: (context) => const BasicWidget()),
         ),
+      ),
+      (builder) => builder.add(
+        (container) => DisposableResources(),
+        dispose: (service) => service.dispose(),
       ),
     ),
   );
@@ -134,10 +140,13 @@ class _BasicWidgetState extends State<BasicWidget> {
 }
 ```
 
-See more on scoping [here](https://pub.dev/packages/ioc_container#scoping-and-disposal). 
+See more on scoping [here](https://pub.dev/packages/ioc_container#scoping-and-disposal).
 
 ### Async Injection
-If your dependency requires async initialization, you can do this using 'addAsync'. You can use the [`FutureBuilder`](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html) widget to render the object when it is available. Here's an example:
+
+If your dependency requires async initialization, you can do this using `addAsync`. You can use the [`FutureBuilder`](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html) widget to render the object when it is available. Async singletons come with a [guarantee of no reentrancy](https://pub.dev/packages/ioc_container/versions/2.0.1-beta#v2-and-async-locking)(async locking), so it is safe to grab the singleton anywhere in the app and the future will resolve once.
+
+ Here's an example:
 
 ```dart
 import 'dart:async';
@@ -147,10 +156,12 @@ import 'package:flutter_ioc_container/flutter_ioc_container.dart';
 void main() {
   runApp(
     CompositionRoot(
-      compose: (builder) => builder.addSingletonAsync(
-        (container) async => Future<String>.delayed(
-          const Duration(seconds: 5),
-          () => 'Hello world!',
+      compose: BuildCompose(
+        (builder) => builder.addSingletonAsync(
+          (container) async => Future<String>.delayed(
+            const Duration(seconds: 5),
+            () => 'Hello world!',
+          ),
         ),
       ),
       child: MaterialApp(
@@ -194,7 +205,7 @@ See more on async injection [here](https://pub.dev/packages/ioc_container#async-
 
 ## Replace Dependencies with Test Doubles for Testing
 
-Pass a configure `configureOverrides` function into your root widget. This allows you to replace dependencies with test doubles for testing. See the example widget [tests](example/test/widget_test.dart) for a full example.
+Pass a `configureOverrides` function into your root widget. This allows you to replace dependencies with test doubles for testing. See the example widget [tests](example/test/widget_test.dart) for a full example.
 
 ```dart
 class MyApp extends StatelessWidget {
@@ -203,24 +214,26 @@ class MyApp extends StatelessWidget {
     this.configureOverrides,
   });
 
-  //This allows us to override the dependencies for testing. Take a look at
-  //the widget tests
-  final void Function(IocContainerBuilder builder)? configureOverrides;
+  // This allows us to override the dependencies for testing. Take a look at
+  // the widget tests
+  final ConfigureBuild? configureOverrides;
 
   @override
   Widget build(BuildContext context) => CompositionRoot(
-        configureOverrides: configureOverrides,
-        compose: (builder) => builder
-          //Adds a singleton CounterController to the container
-          ..addSingleton(
-            (container) => CounterController(),
-          ),
-        // [...] See the example folder of this package for a full example
+        compose: BuildCompose(
+          configureOverrides: configureOverrides,
+          (builder) => builder
+            // Adds a singleton CounterController to the container
+            ..addSingleton(
+              (container) => CounterController(),
+            ),
+          // [...] See the example folder of this package for a full example
+        ),
       );
 }
 ```
 
-This example overrides the dependency with a `MockValueNotifier`
+This example overrides the dependency with a `MockValueNotifier`:
 
 ```dart
 testWidgets('Basic Smoke Test', (tester) async {
@@ -228,24 +241,24 @@ testWidgets('Basic Smoke Test', (tester) async {
 
     await tester.pumpWidget(
       MyApp(
-        //This is how you substitute dependencies with test doubles
+        // This is how you substitute dependencies with test doubles
         configureOverrides: (builder) => builder
             .addSingleton<CounterController>((container) => mockValueNotifier),
       ),
     );
 
-    //Initial value
+    // Initial value
     expect(find.text('0'), findsOneWidget);
 
-    //Tap the button
+    // Tap the button
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
 
-    //Verify value
+    // Verify value
     expect(find.text('1'), findsOneWidget);
     expect(find.text('0'), findsNothing);
 
-    //Ensure we're using the mock dependency
+    // Ensure we're using the mock dependency
     expect(mockValueNotifier.hasCalls, isTrue);
   });
 ```
