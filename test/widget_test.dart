@@ -95,6 +95,73 @@ void main() {
     expect(find.byType(BasicWidgetWithScope), findsOneWidget);
     expect(find.text('Hi'), findsOneWidget);
   });
+
+  testWidgets('build compose with overrides', (tester) async {
+    const text = 'override';
+    await tester.pumpWidget(
+      CompositionRoot(
+        compose: BuildCompose(
+          (b) => b.add<String>((_) => 'original'),
+        ),
+        configureOverrides: (builder) => builder.add<String>((_) => text),
+        child: const BasicWidget(),
+      ),
+    );
+    expect(find.text(text), findsOneWidget);
+    expect(find.text('original'), findsNothing);
+  });
+
+  testWidgets('builder compose', (tester) async {
+    const text = 'test';
+    final iocContainerBuilder = IocContainerBuilder()..add((_) => text);
+    await tester.pumpWidget(
+      CompositionRoot(
+        compose: BuilderCompose(iocContainerBuilder),
+        child: const BasicWidget(),
+      ),
+    );
+    expect(find.text(text), findsOneWidget);
+  });
+
+  testWidgets('basic scoping', (tester) async {
+    await tester.pumpWidget(
+      CompositionRoot(
+        compose: ContainerCompose(
+          (IocContainerBuilder()
+                ..addSingleton((_) => A())
+                ..addSingleton((_) => B())
+                ..add((container) => C(container<B>(), container<B>())))
+              .toContainer(),
+        ),
+        child: const BasicWidgetWithScope(),
+      ),
+    );
+
+    final state = tester.state<_BasicWidgetWithScopeState>(
+      find.byType(BasicWidgetWithScope),
+    );
+    expect(identical(state.one, state.two), isTrue);
+    expect(identical(state.c.b1, state.c.b2), isTrue);
+
+    await tester.pumpWidget(
+      CompositionRoot(
+        compose: ContainerCompose(
+          (IocContainerBuilder()
+                ..addSingleton((_) => A())
+                ..addSingleton((_) => B())
+                ..add((container) => C(container<B>(), container<B>())))
+              .toContainer(),
+        ),
+        child: const BasicWidgetWithScopeNoExisting(),
+      ),
+    );
+
+    final stateNoExisting = tester.state<_BasicWidgetWithScopeNoExistingState>(
+      find.byType(BasicWidgetWithScopeNoExisting),
+    );
+    expect(identical(stateNoExisting.one, stateNoExisting.two), isTrue);
+    expect(identical(stateNoExisting.c.b1, stateNoExisting.c.b2), isFalse);
+  });
 }
 
 class A {}
@@ -131,6 +198,33 @@ class _BasicWidgetWithScopeState extends State<BasicWidgetWithScope> {
   @override
   void didChangeDependencies() {
     final scope = context.scoped();
+    one = scope<A>();
+    two = scope<A>();
+    c = context.getScoped<C>();
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) => const MaterialApp(home: Text('Hi'));
+}
+
+class BasicWidgetWithScopeNoExisting extends StatefulWidget {
+  const BasicWidgetWithScopeNoExisting({super.key});
+
+  @override
+  State<BasicWidgetWithScopeNoExisting> createState() =>
+      _BasicWidgetWithScopeNoExistingState();
+}
+
+class _BasicWidgetWithScopeNoExistingState
+    extends State<BasicWidgetWithScopeNoExisting> {
+  late final A one;
+  late final A two;
+  late final C c;
+
+  @override
+  void didChangeDependencies() {
+    final scope = context.scoped(useExistingSingletons: false);
     one = scope<A>();
     two = scope<A>();
     c = context.getScoped<C>();
