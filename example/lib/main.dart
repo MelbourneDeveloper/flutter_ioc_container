@@ -26,13 +26,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CompositionRoot(
-        configureOverrides: configureOverrides,
         compose: BuildCompose(
           (builder) => builder
             //Adds a singleton CounterController to the container
             ..addSingleton(
               (container) => CounterController(),
             ),
+          configureOverrides: configureOverrides,
         ),
         child:
             //We need the BuildContext from the Builder here so the children

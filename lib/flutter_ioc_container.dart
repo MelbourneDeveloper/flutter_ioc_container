@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ioc_container/ioc_container.dart';
 
 /// Given a [IocContainerBuilder], this function is used to configure the
-/// container. 
+/// container.
 typedef ConfigureBuild = void Function(IocContainerBuilder builder);
 
 ///A Compose object is used to determine how the IoC container is created.
@@ -23,11 +23,16 @@ final class ContainerCompose extends Compose {
 /// constructing the [CompositionRoot]. Most apps will use this case
 final class BuildCompose extends Compose {
   /// Creates a [BuildCompose]
-  BuildCompose(this.configureBuild);
+  BuildCompose(this.configureBuild, {this.configureOverrides});
 
   /// Exposes the builder so you can configure it at the point of constructing
   /// the [CompositionRoot]
   final ConfigureBuild configureBuild;
+
+  ///Allows overrides for testing
+  final ConfigureBuild?
+      // ignore: diagnostic_describe_all_properties
+      configureOverrides;
 }
 
 /// Use this to build the container from a builder at the point of
@@ -47,15 +52,12 @@ class CompositionRoot extends InheritedWidget {
   CompositionRoot({
     required super.child,
     required Compose compose,
-    this.configureOverrides,
     super.key,
   }) : container = switch (compose) {
           // Accepts an existing container
           final ContainerCompose cc => cc.container,
           // Builds the container from a builder
-          final BuildCompose bc =>
-            _getBuilder(bc, configureOverrides != null, configureOverrides)
-                .toContainer(),
+          final BuildCompose bc => _getBuilder(bc).toContainer(),
           // Builds the container from a builder, but BYO
           final BuilderCompose bc => bc.builder.toContainer(),
         };
@@ -64,30 +66,26 @@ class CompositionRoot extends InheritedWidget {
   /// a simple composition
   factory CompositionRoot.configureBuild(
     Widget child,
-    ConfigureBuild configureBuild,
-  ) =>
+    ConfigureBuild configureBuild, {
+    ConfigureBuild? configureOverrides,
+  }) =>
       CompositionRoot(
-        compose: BuildCompose(configureBuild),
+        compose: BuildCompose(
+          configureBuild,
+          configureOverrides: configureOverrides,
+        ),
         child: child,
       );
 
   /// Runs the configuration on the builder
-  static IocContainerBuilder _getBuilder(
-    BuildCompose composeBuilder,
-    bool allowOverrides,
-    ConfigureBuild? configureOverrides,
-  ) {
-    final iocContainerBuilder =
-        IocContainerBuilder(allowOverrides: allowOverrides);
+  static IocContainerBuilder _getBuilder(BuildCompose composeBuilder) {
+    final iocContainerBuilder = IocContainerBuilder(
+      allowOverrides: composeBuilder.configureOverrides != null,
+    );
     composeBuilder.configureBuild(iocContainerBuilder);
-    configureOverrides?.call(iocContainerBuilder);
+    composeBuilder.configureOverrides?.call(iocContainerBuilder);
     return iocContainerBuilder;
   }
-
-  ///Allows overrides for testing
-  final ConfigureBuild?
-      // ignore: diagnostic_describe_all_properties
-      configureOverrides;
 
   ///The IoC container. This is the container that will be used by all widgets.
   ///Use [IocContainerBuilder] to compose your dependencies and then call

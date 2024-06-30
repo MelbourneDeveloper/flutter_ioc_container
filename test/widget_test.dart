@@ -102,8 +102,8 @@ void main() {
       CompositionRoot(
         compose: BuildCompose(
           (b) => b.add<String>((_) => 'original'),
+          configureOverrides: (builder) => builder.add<String>((_) => text),
         ),
-        configureOverrides: (builder) => builder.add<String>((_) => text),
         child: const BasicWidget(),
       ),
     );
